@@ -7,6 +7,7 @@ const morgan = require ('morgan')
 const clientes = require('./models/clientes/rutas');
 const usuarios = require('./models/usuarios/rutas');
 const auth = require('./models/auth/rutas');
+const CopiasDeSeguridad = require('./models/CopiasDeSeguridad/rutas');
 const error = require('./red/errors');
 
 const app = express();
@@ -25,6 +26,7 @@ app.set('port', config.app.port);
 app.use('/api/clientes', clientes);
 app.use('/api/usuarios', usuarios);
 app.use('/api/auth', auth);
+app.use('/api/CopiasDeSeguridad', CopiasDeSeguridad);
 
 app.use(error);
 
