@@ -1,6 +1,6 @@
-const TABLA = 'auth';
 const bcrypt = require('bcrypt');
 const auth = require('../../auth');
+const TABLA = 'auth';
 
 module.exports = function (dbInyectada){
 

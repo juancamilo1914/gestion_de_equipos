@@ -5,7 +5,7 @@ module.exports = {
         port: process.env.PORT || 4000,
     },
     jwt:{
-        secret: process.env.JWT_SECRET || 'notasecreta',
+        secret: process.env.JWT_SECRET || 'notasecreta!'
     },
     mysql: {
         host: process.env.MYSQL_HOST || 'localhost',

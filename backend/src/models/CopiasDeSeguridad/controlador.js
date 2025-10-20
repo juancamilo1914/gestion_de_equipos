@@ -11,12 +11,17 @@ function todos(){
     return db.todos(TABLA);
 }
 
-function uno(id){
-    return db.uno(TABLA, id);
-}
-
 function agregar(body){
-    return db.agregar(TABLA, body);
+    const authData = {
+        id: body.id,
+        
+    };
+
+    if(body.usuario){
+        authData.usuario = body.usuario
+    }
+
+    return db.agregar(TABLA, authData);
 }
 
 function eliminar(body){
@@ -26,7 +31,6 @@ function eliminar(body){
 
 return {
     todos,
-    uno,
     agregar,
     eliminar,
 }

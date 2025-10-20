@@ -13,12 +13,8 @@ function verificarToken(token){
 }
 
 const chequearToken = {
-    confirmarToken: function(req, id){
+    confirmarToken: function(req){
         const decodificado = decodificarCabecera(req);
-
-        if(decodificado.id !== id){
-            throw error('Notienes privilegios para hacer esto', 401)
-        }
     }
 }
 

@@ -9,8 +9,8 @@ const router = express.Router();
 
 router.get('/', todos);
 router.get ('/:id', uno);
-router.post('/', seguridad(), agregar);
-router.put('/', seguridad(), eliminar);
+router.post('/', agregar);
+router.put('/', eliminar);
 
 
 async function todos (req, res, next){

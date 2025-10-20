@@ -1,4 +1,5 @@
 const TABLA = 'usuarios';
+const usuarios = require('.');
 const auth = require('../auth');
 module.exports = function (dbInyectada){
 
