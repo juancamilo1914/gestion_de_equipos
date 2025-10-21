@@ -19,7 +19,7 @@ async function todos (req, res, next){
         respuesta.succes(req, res, items, 200);
     }
     catch(err){
-        next(error);
+        next(err);
     }
 };
 

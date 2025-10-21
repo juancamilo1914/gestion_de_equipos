@@ -1,4 +1,4 @@
-const TABLA = 'CopiasDeSeguridad';
+const TABLA = 'impresoras';
 module.exports = function (dbInyectada){
 
     let db = dbInyectada;
@@ -13,11 +13,10 @@ function todos(){
 
 function agregar(body){
     const authData = {
-        id: body.id,
         area: body.area,
-        tipo: body.tipo,
-        marca: body.marca,
-        fecha: body.fecha,
+        modelo: body.modelo,
+        direccion_IP: body.direccion_IP,
+        novedad: body.novedad
     };
 
     if(body.usuario){
@@ -30,11 +29,10 @@ function agregar(body){
 function modificar(body){
     // reutilizamos la misma estructura que en `agregar` para hacer un upsert.
     const authData = {
-        id: body.id,
         area: body.area,
-        tipo: body.tipo,
-        marca: body.marca,
-        fecha: body.fecha,
+        modelo: body.modelo,
+        direccion_IP: body.direccion_IP,
+        novedad: body.novedad
     };
 
     if(body.usuario){
