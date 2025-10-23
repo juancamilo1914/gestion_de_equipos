@@ -6,7 +6,8 @@ const controlador = require('./index');
 
 const router = express.Router();
 
-router.get('/login', login);
+// El endpoint de login recibe credenciales en el body, por eso debe ser POST
+router.post('/login', login);
 
 async function login (req, res, next){
     try{

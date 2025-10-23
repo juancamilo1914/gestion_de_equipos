@@ -13,15 +13,19 @@ module.exports = function (dbInyectada){
     async function login(usuario, password){
         const data = await db.query(TABLA, {usuario: usuario});
 
+        if(!data){
+            throw new Error('Usuario o contraseña inválidos');
+        }
+
         return bcrypt.compare(password, data.password)
             .then(resultado => {
                 if(resultado === true){
-                //generar token
-                return auth.asignarToken({...data});
-            }else{
-                throw new Error('Informacion invalida');
-            }
-        })
+                    // generar token
+                    return auth.asignarToken({...data});
+                }else{
+                    throw new Error('Usuario o contraseña inválidos');
+                }
+            })
     }
 
     async function agregar(data){
