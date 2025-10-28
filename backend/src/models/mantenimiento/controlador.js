@@ -62,16 +62,12 @@ function agregar(body){
         fecha_de_ejecucion: body.fecha_de_ejecucion,
     };
 
-    if(body.usuario){
-        authData.usuario = body.usuario
-    }
-
     return db.agregar(TABLA, authData);
 }
 
-function modificar(body){
+function modificar(id, body){
     const authData = {
-        id: body.id,
+        id: id, // Usamos el ID que viene como parámetro de la URL
         usuario: body.usuario,
         area: body.area,
         tipo: body.tipo,
@@ -84,10 +80,6 @@ function modificar(body){
         fecha_de_elaboracion: body.fecha_de_elaboracion,
         fecha_de_ejecucion: body.fecha_de_ejecucion,
     };
-
-    if(body.usuario){
-        authData.usuario = body.usuario
-    }
 
     // Usamos la misma operación que agregar (INSERT ... ON DUPLICATE KEY UPDATE)
     return db.agregar(TABLA, authData);

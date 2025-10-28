@@ -11,6 +11,7 @@ router.get('/', todos);
 router.get ('/:id', uno);
 router.post('/', agregar);
 router.put('/', eliminar);
+router.post('/change-password', seguridad(), changePassword);
 
 
 async function todos (req, res, next){
@@ -54,5 +55,17 @@ async function eliminar(req, res, next) {
         next(err);
     }
 };
+
+async function changePassword(req, res, next) {
+    try {
+        // The user id should be in the token
+        const { id } = req.user;
+        const { oldPassword, newPassword } = req.body;
+        await controlador.changePassword(id, oldPassword, newPassword);
+        respuesta.succes(req, res, 'Contraseña actualizada con éxito', 200);
+    } catch (err) {
+        next(err);
+    }
+}
 
 module.exports = router;

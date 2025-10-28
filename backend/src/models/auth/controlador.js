@@ -43,10 +43,28 @@ module.exports = function (dbInyectada){
         authData.password = await bcrypt.hash(data.password.toString(), 5);
     }
     return db.agregar(TABLA, authData);
-    }   
+    }
+
+    async function actualizar(id, oldPassword, newPassword) {
+        const data = await db.query(TABLA, { id: id });
+        if (!data) {
+            throw new Error('Auth data not found');
+        }
+
+        const passwordCorrecto = await bcrypt.compare(oldPassword, data.password);
+
+        if (!passwordCorrecto) {
+            throw new Error('Contraseña actual incorrecta');
+        }
+
+        const newPasswordHashed = await bcrypt.hash(newPassword, 5);
+
+        return db.actualizar(TABLA, id, { password: newPasswordHashed });
+    }
 
     return {
         agregar,
         login,
+        actualizar,
     }
 }

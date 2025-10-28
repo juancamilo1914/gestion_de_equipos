@@ -1,11 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import './home.css';
 import api from '../../api/axios';
+import MaintenancePage from '../mantenimiento/MaintenancePage';
+import LicenciamientoPage from '../licenciamiento/LicenciamientoPage';
+import CopiasPage from '../copiasDeSeguridad/CopiasPage';
+import UserSettingsModal from "../../components/UserSettingsModal";
+import AppSettingsModal from '../../components/AppSettingsModal'; // Importamos el nuevo modal
 
 function Home({ onBack, username }) {
     const [now, setNow] = useState(new Date());
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [showUserSettings, setShowUserSettings] = useState(false);
+    const [showAppSettings, setShowAppSettings] = useState(false); // Estado para el nuevo modal
+    const notificationsRef = useRef(null);
 
+    const [currentView, setCurrentView] = useState('dashboard'); // Nuevo estado para controlar la vista actual
     useEffect(() =>{
         const t = setInterval(()=> setNow(new Date()), 1000);
         return () => clearInterval(t);
@@ -71,6 +81,19 @@ function Home({ onBack, username }) {
         }
     }
 
+    async function handleClearAllNotifications() {
+        if (!confirm('¿Marcar todos los recordatorios como realizados?')) return;
+        try {
+            const uncompletedReminders = reminders.filter(r => !r.realizado);
+            const promises = uncompletedReminders.map(rem => 
+                api.patch(`/recordatorios/${rem.id}/realizado`, { realizado: 1 })
+            );
+            await Promise.all(promises);
+            fetchReminders(); // Volver a cargar para reflejar los cambios
+        } catch (err) {
+            console.error('Error al limpiar los recordatorios', err);
+        }
+    }
 
     // obtener el recordatorio más reciente cuya fecha sea <= ahora (si ninguno, el más próximo)
     function getLatestReminder(){
@@ -86,6 +109,8 @@ function Home({ onBack, username }) {
     const latest = getLatestReminder();
 
     const timeStr = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+    const uncompletedReminders = reminders.filter(r => !r.realizado);
+
     const day = now.toLocaleDateString([], { day: '2-digit' });
     const month = now.toLocaleDateString([], { month: 'long' }).toUpperCase();
     const year = now.getFullYear();
@@ -95,10 +120,11 @@ function Home({ onBack, username }) {
             <aside className="sidebar">
                 <div className="sidebar-top">
                     <div className="sidebar-brand">GESTION DE<br/>EQUIPOS</div>
-                    <nav className="side-nav">
-                        <button className="nav-btn">MANTENIMIENTO</button>
-                        <button className="nav-btn">LICENCIAMIENTO</button>
-                        <button className="nav-btn">COPIAS DE SEGURIDAD</button>
+                    <nav className="side-nav"> 
+                        <button className={currentView === 'dashboard' ? 'nav-btn active' : 'nav-btn'} onClick={() => setCurrentView('dashboard')}>DASHBOARD</button> {/* Agregado botón para volver al dashboard */}
+                        <button className={currentView === 'mantenimiento' ? 'nav-btn active' : 'nav-btn'} onClick={() => setCurrentView('mantenimiento')}>MANTENIMIENTO</button>
+                        <button className={currentView === 'licenciamiento' ? 'nav-btn active' : 'nav-btn'} onClick={() => setCurrentView('licenciamiento')}>LICENCIAMIENTO</button>
+                        <button className={currentView === 'copias' ? 'nav-btn active' : 'nav-btn'} onClick={() => setCurrentView('copias')}>COPIAS DE SEGURIDAD</button>
                         <button className="nav-btn">IMPRESORAS</button>
                     </nav>
                 </div>
@@ -110,132 +136,142 @@ function Home({ onBack, username }) {
                     <div className="logo-row">
                         <button className="hamburger" onClick={() => setSidebarOpen(s => !s)} aria-label="Toggle menu">☰</button>
                         <div className="logo-pill">GE</div>
-                        <div className="org">Corporación<br/>NASA KIWE</div>
+                        <div className="org">GESTION DE<br/>EQUIPOS</div>
+                        <div className="topbar-time">{timeStr}</div>
+                        <div className="logoNasakiwe"></div>
                     </div>
-                    <div className="top-actions">
-                        <button className="icon-btn">🔔</button>
-                        <button className="icon-btn">👤</button>
-                        <button className="icon-btn">⚙️</button>
+                    <div className="top-actions" >
+                        <button className="icon-btn" onClick={() => setShowNotifications(s => !s)}>
+                            🔔
+                            {uncompletedReminders.length > 0 && <span className="notification-badge">{uncompletedReminders.length}</span>}
+                        </button>
+                        <button className="icon-btn" title="Ajustes de usuario" onClick={() => setShowUserSettings(true)}>👤</button>
+                        <button className="icon-btn" title="Ajustes de la aplicación" onClick={() => setShowAppSettings(true)}>⚙️</button>
+                        <button className="icon-btn" title="Cerrar sesión" onClick={() => onBack && onBack()}>🚪</button>
                     </div>
                 </header>
 
-                <section className="hero">
-                    <div className="hero-left card big-card">
-                        <div className="hero-time">{timeStr}</div>
-                        <h2>HOLA,<br/><span className="username">{username || '(USUARIO)'}</span></h2>
-                        <h4>RECORDATORIOS</h4>
-                        <div className="reminders card-inner">
-                            {latest ? (
-                                <div className="reminder-item">
-                                    <div className="reminder-title">{latest.title}</div>
-                                    <div className="reminder-date">{new Date(latest.date).toLocaleString([], { hour: 'numeric', minute: '2-digit', hour12: true, day: '2-digit', month: 'short' })}</div>
-                                </div>
-                            ) : (
-                                <div className="muted">No hay recordatorios</div>
-                            )}
-                        </div>
-                    </div>
-
-                    <aside className="hero-right">
-                        <div className="date-card card">
-                            <div className="month">{month}</div>
-                            <div className="day">{day}</div>
-                            <div className="year">{year}</div>
-                        </div>
-                    </aside>
-                </section>
-
-                <section className="stats-section">
-                    <div className="stats-cards">
-                        <div className="stat card">
-                            <h4>Equipos</h4>
-                            <div className="stat-value">128</div>
-                            <div className="muted">Activos en el último mes</div>
-                        </div>
-                        <div className="stat card">
-                            <h4>Recordatorios</h4>
-                            <div className="stat-value">{reminders.length}</div>
-                            <div className="muted">Activos / programados</div>
-                        </div>
-                        <div className="stat card">
-                            <h4>Licencias</h4>
-                            <div className="stat-value">58</div>
-                            <div className="muted">Por renovar</div>
-                        </div>
-                    </div>
-
-                    <div className="lower-grid">
-                        <div className="card actions-card">
-                            <h4>Acciones rápidas</h4>
-                            <div className="quick-actions">
-                                <button className="action-btn">Agregar equipo</button>
-                                <button className="action-btn" onClick={() => { setShowForm(s => !s); setEditingId(null); setFormTitle(''); setFormDateTime(''); }}>{showForm ? 'Cancelar' : 'Crear recordatorio'}</button>
-                                <button className="action-btn">Ver copias de seguridad</button>
-                            </div>
-
-                            {showForm && (
-                                <form className="create-form" onSubmit={async (e) => {
-                                    e.preventDefault();
-                                    try{
-                                        const payloadDate = formDateTime ? new Date(formDateTime).toISOString() : new Date().toISOString();
-                                        if(editingId){
-                                            await api.put(`/recordatorios/${editingId}`, { title: formTitle, date: payloadDate });
-                                        } else {
-                                            await api.post('/recordatorios', { title: formTitle, date: payloadDate, realizado: 0 });
-                                        }
-                                        setShowForm(false);
-                                        setFormTitle('');
-                                        setFormDateTime('');
-                                        setEditingId(null);
-                                        fetchReminders();
-                                    }catch(err){
-                                        console.error('Error saving reminder', err);
-                                        alert('Error al guardar recordatorio');
-                                    }
-                                }}>
-                                    <div style={{display:'flex',flexDirection:'column',gap:8,marginTop:10}}>
-                                        <input required placeholder="Título" value={formTitle} onChange={e=>setFormTitle(e.target.value)} />
-                                        <input type="datetime-local" value={formDateTime} onChange={e=>setFormDateTime(e.target.value)} />
-                                        <div style={{display:'flex',gap:8}}>
-                                            <button className="action-btn" type="submit">Guardar</button>
-                                            <button className="action-btn" type="button" onClick={()=>{ setShowForm(false); setEditingId(null); setFormTitle(''); setFormDateTime(''); }}>Cancelar</button>
+                {/* Renderizado condicional del contenido principal */}
+                {currentView === 'dashboard' && (
+                    <>
+                        <section className="hero">
+                            <div className="hero-left card big-card"> {/* Este contenedor ahora será un flex-direction: column en CSS */}
+                                <div className="hero-content-flex"> {/* Nuevo contenedor para el saludo y los recordatorios (flex-direction: row en CSS) */}
+                                    <div className="hero-greeting">
+                                        <h2>HOLA,<br/><span className="username">{username || '(USUARIO)'}</span></h2>
+                                    </div>
+                                    <div className="hero-reminders"> {/* Contenedor para la sección de recordatorios */}
+                                        <h4>RECORDATORIOS</h4>
+                                        <div className="reminders-list card-inner"> {/* Renombrado de 'reminders' a 'reminders-list' */}
+                                            {latest ? (
+                                                <div className="reminder-item">
+                                                    <div className="reminder-title">{latest.title}</div>
+                                                    <div className="reminder-date">{new Date(latest.date).toLocaleString([], { hour: 'numeric', minute: '2-digit', hour12: true, day: '2-digit', month: 'short' })}</div>
+                                                </div>
+                                            ) : (
+                                                <div className="muted">No hay recordatorios</div>
+                                            )}
                                         </div>
                                     </div>
-                                </form>
-                            )}
-                        </div>
+                                </div>
 
-                        <div className="card activity-card">
-                            <h4>Actividad reciente</h4>
-                            <div className="recent-list">
-                                {loadingReminders ? (
-                                    <div className="muted">Cargando...</div>
-                                ) : (
-                                    reminders.slice().sort((a,b)=> b.date?.localeCompare(a.date)).map(rem => (
-                                        <div key={rem.id} className="recent-item">
-                                            <div style={{display:'flex',flexDirection:'column'}}>
-                                                <span style={{textDecoration: rem.realizado ? 'line-through' : 'none'}}>{rem.title}</span>
-                                                <small className="muted">{rem.date ? new Date(rem.date).toLocaleString([], { hour: 'numeric', minute: '2-digit', hour12: true, day: '2-digit', month: 'short' }) : ''}</small>
+                                <div className="quick-actions-dashboard"> {/* Nuevo contenedor para acciones rápidas */}
+                                    <h4>Acciones rápidas</h4>
+                                    <div className="quick-actions">
+                                        <button className="action-btn" onClick={() => setCurrentView('mantenimiento')}>Mantenimiento</button>
+                                        <button className="action-btn" onClick={() => setCurrentView('licenciamiento')}>Licenciamiento</button>
+                                        <button className="action-btn" onClick={() => setCurrentView('copias')}>Copias de Seguridad</button>
+                                        <button className="action-btn" onClick={() => { setShowForm(s => !s); setEditingId(null); setFormTitle(''); setFormDateTime(''); }}>{showForm ? 'Cancelar' : 'Crear recordatorio'}</button>
+                                    </div>
+
+                                    {showForm && (
+                                        <form className="create-form" onSubmit={async (e) => {
+                                            e.preventDefault();
+                                            try{
+                                                const payloadDate = formDateTime ? new Date(formDateTime).toISOString() : new Date().toISOString();
+                                                if(editingId){
+                                                    await api.put(`/recordatorios/${editingId}`, { title: formTitle, date: payloadDate });
+                                                } else {
+                                                    await api.post('/recordatorios', { title: formTitle, date: payloadDate, realizado: 0 });
+                                                }
+                                                setShowForm(false);
+                                                setFormTitle('');
+                                                setFormDateTime('');
+                                                setEditingId(null);
+                                                fetchReminders();
+                                            }catch(err){
+                                                console.error('Error saving reminder', err);
+                                                alert('Error al guardar recordatorio');
+                                            }
+                                        }}>
+                                            <div style={{display:'flex',flexDirection:'column',gap:8,marginTop:10}}>
+                                                <input required placeholder="Título" value={formTitle} onChange={e=>setFormTitle(e.target.value)} />
+                                                <input type="datetime-local" value={formDateTime} onChange={e=>setFormDateTime(e.target.value)} />
+                                                <div style={{display:'flex',gap:8}}>
+                                                    <button className="action-btn" type="submit">Guardar</button>
+                                                    <button className="action-btn" type="button" onClick={()=>{ setShowForm(false); setEditingId(null); setFormTitle(''); setFormDateTime(''); }}>Cancelar</button>
+                                                </div>
                                             </div>
-                                            <div style={{display:'flex',gap:8}}>
-                                                <button className="action-btn" style={{padding:'6px 10px'}} onClick={()=>handleEdit(rem)}>Editar</button>
-                                                <button className="action-btn" style={{padding:'6px 10px',background: rem.realizado ? '#f59e0b' : '#10b981'}} onClick={()=>handleToggleRealizado(rem)}>{rem.realizado ? 'Reabrir' : 'Realizado'}</button>
-                                                <button className="action-btn" style={{padding:'6px 10px',background:'#ef4444'}} onClick={()=>handleDelete(rem)}>Eliminar</button>
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
+                                        </form>
+                                    )}
+                                </div>
                             </div>
-                            <div style={{marginTop:12}}>
-                            <button className="action-btn logout" onClick={() => onBack && onBack()} style={{background:'#ef4444'}}>Cerrar sesión</button>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                            <aside className="hero-right">
+                                <div className="date-card card">
+                                    <div className="month">{month}</div>
+                                    <div className="day">{day}</div>
+                                    <div className="year">{year}</div>
+                                </div>
+                            </aside>
+                        </section>
+                    </>
+                )}
+
+                {currentView === 'mantenimiento' && <MaintenancePage />}
+                {currentView === 'licenciamiento' && <LicenciamientoPage />} 
+                {currentView === 'copias' && <CopiasPage />} 
+                {currentView === 'impresoras' && <div className="page-placeholder card"><h2>Página de Impresoras (próximamente)</h2></div>}
+
             </main>
 
-            {/* backdrop para pantalla pequeña */}
-            {sidebarOpen && <div className="backdrop" onClick={() => setSidebarOpen(false)} />}
+            {/* backdrop para modales y sidebar */}
+            {(sidebarOpen || showNotifications || showUserSettings || showAppSettings) && <div className="backdrop" onClick={() => { setSidebarOpen(false); setShowNotifications(false); setShowUserSettings(false); setShowAppSettings(false); }} />}
+
+            {showUserSettings && <UserSettingsModal onClose={() => setShowUserSettings(false)} />}
+            {showAppSettings && <AppSettingsModal onClose={() => setShowAppSettings(false)} />}
+
+            {/* Modal de Notificaciones */}
+            {showNotifications && (
+                <div className="notifications-modal" onClick={() => setShowNotifications(false)}>
+                    <div className="notifications-panel" onClick={(e) => e.stopPropagation()}>
+                        <div className="notifications-header">
+                            <div className="notifications-header-title">
+                                <span className="icon">🔔</span>
+                                <h4>Notificaciones</h4>
+                            </div>
+                            <button className="link small" onClick={handleClearAllNotifications}>Limpiar todo</button>
+                        </div>
+                        <div className="notifications-list">
+                            {uncompletedReminders.length > 0 ? (
+                                uncompletedReminders.map(rem => (
+                                    <div key={rem.id} className="notification-item">
+                                        <div className="notification-content">
+                                            <div className="notification-title">{rem.title}</div>
+                                            <small className="muted">{rem.date ? new Date(rem.date).toLocaleString() : ''}</small>
+                                        </div>
+                                        <button 
+                                            className="clear-notification-btn" 
+                                            title="Marcar como realizado"
+                                            onClick={(e) => { e.stopPropagation(); handleToggleRealizado(rem); }}
+                                        >✓</button>
+                                    </div>
+                                ))
+                            ) : <div className="muted" style={{padding: '1rem'}}>No hay notificaciones nuevas</div>}
+                        </div>
+                        <button className="close-modal-btn" onClick={() => setShowNotifications(false)}>×</button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

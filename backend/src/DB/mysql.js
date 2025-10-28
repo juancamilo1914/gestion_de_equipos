@@ -73,10 +73,19 @@ function query(tabla, consulta){
     });
 }
 
+function actualizar(tabla, id, data) {
+    return new Promise((resolve, reject) => {
+        conexion.query(`UPDATE ${tabla} SET ? WHERE id = ?`, [data, id], (error, result) => {
+            return error ? reject(error) : resolve(result);
+        });
+    });
+}
+
 module.exports = {
     todos,
     uno,
     agregar,
     eliminar,
     query,
+    actualizar,
 }
