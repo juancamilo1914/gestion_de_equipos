@@ -50,11 +50,16 @@ return respuesta2;
     return db.eliminar(TABLA, body);
     }
 
+    async function changePassword(id, oldPassword, newPassword) {
+        return auth.actualizar(id, oldPassword, newPassword);
+    }
+
 
 return {
     todos,
     uno,
     agregar,
     eliminar,
+    changePassword,
 }
 }

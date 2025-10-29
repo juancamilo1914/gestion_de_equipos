@@ -13,15 +13,19 @@ module.exports = function (dbInyectada){
     async function login(usuario, password){
         const data = await db.query(TABLA, {usuario: usuario});
 
+        if(!data){
+            throw new Error('Usuario o contraseña inválidos');
+        }
+
         return bcrypt.compare(password, data.password)
             .then(resultado => {
                 if(resultado === true){
-                //generar token
-                return auth.asignarToken({...data});
-            }else{
-                throw new Error('Informacion invalida');
-            }
-        })
+                    // generar token
+                    return auth.asignarToken({...data});
+                }else{
+                    throw new Error('Usuario o contraseña inválidos');
+                }
+            })
     }
 
     async function agregar(data){
@@ -39,10 +43,28 @@ module.exports = function (dbInyectada){
         authData.password = await bcrypt.hash(data.password.toString(), 5);
     }
     return db.agregar(TABLA, authData);
-    }   
+    }
+
+    async function actualizar(id, oldPassword, newPassword) {
+        const data = await db.query(TABLA, { id: id });
+        if (!data) {
+            throw new Error('Auth data not found');
+        }
+
+        const passwordCorrecto = await bcrypt.compare(oldPassword, data.password);
+
+        if (!passwordCorrecto) {
+            throw new Error('Contraseña actual incorrecta');
+        }
+
+        const newPasswordHashed = await bcrypt.hash(newPassword, 5);
+
+        return db.actualizar(TABLA, id, { password: newPasswordHashed });
+    }
 
     return {
         agregar,
         login,
+        actualizar,
     }
 }

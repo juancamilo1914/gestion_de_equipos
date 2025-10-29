@@ -1,6 +1,7 @@
 const express = require('express');
 const config = require('./config');
-const morgan = require ('morgan')
+const morgan = require ('morgan');
+const cors = require('cors');
 
 
 //importing routes
@@ -11,6 +12,7 @@ const CopiasDeSeguridad = require('./models/CopiasDeSeguridad/rutas');
 const impresoras = require('./models/impresoras/rutas');
 const licenciamiento = require('./models/licenciamiento/rutas');
 const mantenimiento = require('./models/mantenimiento/rutas');
+const recordatorios = require('./models/recordatorios/rutas');
 const error = require('./red/errors');
 
 const app = express();
@@ -19,11 +21,15 @@ const app = express();
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+app.use(cors({ origin: "http://localhost:5173" }));
 
 
 //config
 app.set('port', config.app.port);
 
+//rutas frontend
+// Nota: evitar mezclar import/require. Las rutas de usuarios ya se requieren arriba
+// por lo que no es necesario re-importarlas con sintaxis ESM.
 
 //rutes
 app.use('/api/clientes', clientes);
@@ -33,6 +39,7 @@ app.use('/api/CopiasDeSeguridad', CopiasDeSeguridad);
 app.use('/api/impresoras', impresoras);
 app.use('/api/licenciamiento', licenciamiento);
 app.use('/api/mantenimiento', mantenimiento);
+app.use('/api/recordatorios', recordatorios);
 
 app.use(error);
 

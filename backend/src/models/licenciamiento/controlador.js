@@ -53,10 +53,6 @@ function agregar(body){
         otro_software: body.otro_software,
     };
 
-    if(body.usuario){
-        authData.usuario = body.usuario
-    }
-
     return db.agregar(TABLA, authData);
 }
 

@@ -1,0 +1,52 @@
+.copias-page {
+    padding: 20px;
+    background-color: var(--bg-color-light);
+    min-height: calc(100vh - 60px); /* Adjust based on topbar height */
+}
+
+.copias-table-container {
+    margin-top: 20px;
+    overflow-x: auto;
+}
+
+.copias-table-container table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.copias-table-container th,
+.copias-table-container td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.copias-table-container th {
+    background-color: var(--header-bg-color);
+    color: var(--text-color-dark);
+    font-weight: bold;
+}
+
+.copias-table-container tbody tr:hover {
+    background-color: var(--hover-bg-color);
+    cursor: pointer;
+}
+
+.copias-table-container tbody tr.selected {
+    background-color: var(--selected-bg-color);
+}
+
+.details-panel {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: var(--card-bg-color);
+    box-shadow: var(--card-shadow);
+    position: relative;
+}
+
+.details-panel .close-details-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
