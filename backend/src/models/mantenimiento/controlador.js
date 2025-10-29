@@ -48,7 +48,6 @@ function uno(id){
 
 function agregar(body){
     const authData = {
-        id: body.id,
         usuario: body.usuario,
         area: body.area,
         tipo: body.tipo,
@@ -67,7 +66,6 @@ function agregar(body){
 
 function modificar(id, body){
     const authData = {
-        id: id, // Usamos el ID que viene como parámetro de la URL
         usuario: body.usuario,
         area: body.area,
         tipo: body.tipo,
@@ -81,8 +79,8 @@ function modificar(id, body){
         fecha_de_ejecucion: body.fecha_de_ejecucion,
     };
 
-    // Usamos la misma operación que agregar (INSERT ... ON DUPLICATE KEY UPDATE)
-    return db.agregar(TABLA, authData);
+    // Usamos UPDATE para modificar el registro existente
+    return db.actualizar(TABLA, id, authData);
 }
 
 function eliminar(id){

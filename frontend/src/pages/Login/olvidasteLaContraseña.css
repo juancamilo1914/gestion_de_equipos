@@ -29,6 +29,7 @@
 .olvidaste-la-contraseña-card .btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
 .olvidaste-la-contraseña-card .btn.primary{background:var(--primary);color:#fff}
 .olvidaste-la-contraseña-card .btn.primary:hover{background:var(--primary-600)}
+.olvidaste-la-contraseña-card .link.small{cursor: pointer;}
 
 .olvidaste-la-contraseña-footer{text-align:center;color:var(--muted);margin-top:6px;font-size:0.9rem}
 

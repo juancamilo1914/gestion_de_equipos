@@ -48,6 +48,10 @@ function App() {
         {view === 'home' && (
           <Home onBack={() => { setToken(null); setUser(null); setView('login'); }} username={user} token={token} />
         )}
+
+        {view === 'registro' && (
+          <RegistroPage onBack={() => setView('login')} />
+        )}
       </div>
     </>
   )

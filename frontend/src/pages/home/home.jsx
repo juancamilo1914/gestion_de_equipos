@@ -1,11 +1,14 @@
 import React, { useEffect, useState, useRef } from "react";
 import './home.css';
 import api from '../../api/axios';
-import MaintenancePage from '../mantenimiento/MaintenancePage';
+import MaintenancePage from '../mantenimiento/maintenancePage';
 import LicenciamientoPage from '../licenciamiento/LicenciamientoPage';
 import CopiasPage from '../copiasDeSeguridad/CopiasPage';
-import UserSettingsModal from "../../components/UserSettingsModal";
-import AppSettingsModal from '../../components/AppSettingsModal'; // Importamos el nuevo modal
+import ImpresorasPage from '../impresoras/ImpresorasPage';
+import AgregarEquipoPage from './AgregarEquipoPage'; // Corregir la ruta de importación
+import UserSettingsModal from './UserSettingsModal'; // Importar modal de usuario
+import AppSettingsModal from './AppSettingsModal'; // Importar modal de app
+
 
 function Home({ onBack, username }) {
     const [now, setNow] = useState(new Date());
@@ -30,14 +33,34 @@ function Home({ onBack, username }) {
     const [editingId, setEditingId] = useState(null);
 
     async function fetchReminders(){
-        try{
-            setLoadingReminders(true);
-            const resp = await api.get('/recordatorios');
-            const data = resp?.data?.body || [];
-            setReminders(Array.isArray(data) ? data : []);
-        }catch(err){
-            console.error('Error fetching reminders', err);
-        }finally{
+        setLoadingReminders(true);
+        try {
+            // 1. Obtener recordatorios manuales
+            const remindersPromise = api.get('/recordatorios');
+            // 2. Obtener datos de mantenimiento para generar recordatorios automáticos
+            const maintenancePromise = api.get('/mantenimiento');
+
+            const [remindersResp, maintenanceResp] = await Promise.all([remindersPromise, maintenancePromise]);
+
+            const manualReminders = remindersResp.data.body || [];
+
+            // 3. Transformar mantenimientos en recordatorios
+            const maintenanceReminders = (maintenanceResp.data.body || [])
+                .filter(item => item.fecha_actual_de_mantenimiento) // Solo los que tienen fecha
+                .map(item => ({
+                    id: `mantenimiento-${item.id}`, // ID único para evitar colisiones
+                    title: `Próximo mantenimiento: ${item.usuario} (${item.tipo})`,
+                    date: item.fecha_actual_de_mantenimiento,
+                    realizado: new Date(item.fecha_actual_de_mantenimiento) < new Date(item.fecha_ultimo_mantenimiento), // Considerar realizado si la fecha de próximo mant. es anterior al último.
+                    source: 'mantenimiento' // Identificador de origen
+                }));
+
+            // 4. Combinar ambos tipos de recordatorios
+            setReminders([...manualReminders, ...maintenanceReminders]);
+
+        } catch (err) {
+            console.error('Error al obtener recordatorios y mantenimientos:', err);
+        } finally {
             setLoadingReminders(false);
         }
     }
@@ -62,6 +85,11 @@ function Home({ onBack, username }) {
     }
 
     async function handleToggleRealizado(rem){
+        // No se puede marcar como realizado un recordatorio automático de mantenimiento
+        if (rem.source === 'mantenimiento') {
+            alert('Este recordatorio se gestiona desde la sección de Mantenimiento.');
+            return;
+        }
         try{
             const newVal = rem.realizado ? 0 : 1;
             await api.patch(`/recordatorios/${rem.id}/realizado`, { realizado: newVal });
@@ -72,6 +100,11 @@ function Home({ onBack, username }) {
     }
 
     async function handleDelete(rem){
+        // No se puede eliminar un recordatorio automático
+        if (rem.source === 'mantenimiento') {
+            alert('Este recordatorio se gestiona desde la sección de Mantenimiento.');
+            return;
+        }
         if(!confirm('¿Eliminar recordatorio?')) return;
         try{
             await api.delete(`/recordatorios/${rem.id}`);
@@ -82,13 +115,14 @@ function Home({ onBack, username }) {
     }
 
     async function handleClearAllNotifications() {
-        if (!confirm('¿Marcar todos los recordatorios como realizados?')) return;
+        if (!confirm('¿Marcar todos los recordatorios manuales como realizados?')) return;
         try {
-            const uncompletedReminders = reminders.filter(r => !r.realizado);
-            const promises = uncompletedReminders.map(rem => 
+            // Solo marcar los recordatorios manuales no completados
+            const uncompletedManualReminders = reminders.filter(r => !r.realizado && !r.source);
+            const promises = uncompletedManualReminders.map(rem => 
                 api.patch(`/recordatorios/${rem.id}/realizado`, { realizado: 1 })
             );
-            await Promise.all(promises);
+            if (promises.length > 0) await Promise.all(promises);
             fetchReminders(); // Volver a cargar para reflejar los cambios
         } catch (err) {
             console.error('Error al limpiar los recordatorios', err);
@@ -125,7 +159,8 @@ function Home({ onBack, username }) {
                         <button className={currentView === 'mantenimiento' ? 'nav-btn active' : 'nav-btn'} onClick={() => setCurrentView('mantenimiento')}>MANTENIMIENTO</button>
                         <button className={currentView === 'licenciamiento' ? 'nav-btn active' : 'nav-btn'} onClick={() => setCurrentView('licenciamiento')}>LICENCIAMIENTO</button>
                         <button className={currentView === 'copias' ? 'nav-btn active' : 'nav-btn'} onClick={() => setCurrentView('copias')}>COPIAS DE SEGURIDAD</button>
-                        <button className="nav-btn">IMPRESORAS</button>
+                        <button className={currentView === 'impresoras' ? 'nav-btn active' : 'nav-btn'} onClick={() => setCurrentView('impresoras')}>IMPRESORAS</button>
+                        <button className={currentView === 'agregarEquipo' ? 'nav-btn active' : 'nav-btn'} onClick={() => setCurrentView('agregarEquipo')}>AGREGAR EQUIPO</button>
                     </nav>
                 </div>
                 {/* Eliminada configuración duplicada: usar icono en topbar */}
@@ -147,7 +182,11 @@ function Home({ onBack, username }) {
                         </button>
                         <button className="icon-btn" title="Ajustes de usuario" onClick={() => setShowUserSettings(true)}>👤</button>
                         <button className="icon-btn" title="Ajustes de la aplicación" onClick={() => setShowAppSettings(true)}>⚙️</button>
-                        <button className="icon-btn" title="Cerrar sesión" onClick={() => onBack && onBack()}>🚪</button>
+                        <button className="icon-btn" title="Cerrar sesión" onClick={() => {
+                            localStorage.removeItem('authToken');
+                            localStorage.removeItem('username');
+                            onBack && onBack(); // Llama a la función onBack del componente padre para actualizar el estado
+                        }}>🚪</button>
                     </div>
                 </header>
 
@@ -230,15 +269,15 @@ function Home({ onBack, username }) {
                 {currentView === 'mantenimiento' && <MaintenancePage />}
                 {currentView === 'licenciamiento' && <LicenciamientoPage />} 
                 {currentView === 'copias' && <CopiasPage />} 
-                {currentView === 'impresoras' && <div className="page-placeholder card"><h2>Página de Impresoras (próximamente)</h2></div>}
+                {currentView === 'impresoras' && <ImpresorasPage />}
+                {currentView === 'agregarEquipo' && <AgregarEquipoPage onEquipoAgregado={() => setCurrentView('dashboard')} />}
 
             </main>
 
             {/* backdrop para modales y sidebar */}
             {(sidebarOpen || showNotifications || showUserSettings || showAppSettings) && <div className="backdrop" onClick={() => { setSidebarOpen(false); setShowNotifications(false); setShowUserSettings(false); setShowAppSettings(false); }} />}
 
-            {showUserSettings && <UserSettingsModal onClose={() => setShowUserSettings(false)} />}
-            {showAppSettings && <AppSettingsModal onClose={() => setShowAppSettings(false)} />}
+
 
             {/* Modal de Notificaciones */}
             {showNotifications && (
@@ -258,6 +297,11 @@ function Home({ onBack, username }) {
                                         <div className="notification-content">
                                             <div className="notification-title">{rem.title}</div>
                                             <small className="muted">{rem.date ? new Date(rem.date).toLocaleString() : ''}</small>
+                                            {rem.source === 'mantenimiento' && (
+                                                <small className="notification-source">
+                                                    <span onClick={(e) => {e.stopPropagation(); setShowNotifications(false); setCurrentView('mantenimiento');}}>Ir a Mantenimiento</span>
+                                                </small>
+                                            )}
                                         </div>
                                         <button 
                                             className="clear-notification-btn" 
@@ -268,9 +312,19 @@ function Home({ onBack, username }) {
                                 ))
                             ) : <div className="muted" style={{padding: '1rem'}}>No hay notificaciones nuevas</div>}
                         </div>
-                        <button className="close-modal-btn" onClick={() => setShowNotifications(false)}>×</button>
+                        {/* <button className="close-modal-btn" onClick={() => setShowNotifications(false)}>×</button> */}
                     </div>
                 </div>
+            )}
+
+            {/* Modal de Ajustes de Usuario */}
+            {showUserSettings && (
+                <UserSettingsModal user={{ nombre: username }} onClose={() => setShowUserSettings(false)} />
+            )}
+
+            {/* Modal de Ajustes de la Aplicación */}
+            {showAppSettings && (
+                <AppSettingsModal onClose={() => setShowAppSettings(false)} />
             )}
         </div>
     );

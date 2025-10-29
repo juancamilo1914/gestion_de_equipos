@@ -9,7 +9,6 @@ function CopiasPage() {
     const [error, setError] = useState(null);
     const [selectedItem, setSelectedItem] = useState(null);
     const [detailedData, setDetailedData] = useState(null);
-    const [loadingDetails, setLoadingDetails] = useState(false);
 
     useEffect(() => {
         fetchCopiasData();
@@ -29,25 +28,15 @@ function CopiasPage() {
         }
     }
 
-    async function handleRowClick(item) {
+    function handleRowClick(item) {
         if (selectedItem && selectedItem.id === item.id) {
             setSelectedItem(null);
             setDetailedData(null);
             return;
         }
         setSelectedItem(item);
-        setDetailedData(null);
-        setLoadingDetails(true);
-        try {
-            const response = await api.get(`/CopiasDeSeguridad/${item.id}`); // Assuming a /:id endpoint exists
-            setDetailedData(response.data.body);
-        } catch (err) {
-            console.error("Error fetching copias de seguridad details:", err);
-            setError("Error al cargar los detalles de la copia de seguridad.");
-            setDetailedData(null);
-        } finally {
-            setLoadingDetails(false);
-        }
+        // No es necesario hacer otra llamada a la API, ya tenemos los datos.
+        setDetailedData(item);
     }
 
     const formatDate = (dateString) => {
@@ -78,20 +67,22 @@ function CopiasPage() {
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Equipo ID</th>
-                                <th>Usuario ID</th>
+                                <th>Usuario</th>
+                                <th>Área</th>
+                                <th>Tipo</th>
+                                <th>Marca</th>
                                 <th>Fecha</th>
-                                <th>Observaciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             {copiasData.map((item) => (
                                 <tr key={item.id} onClick={() => handleRowClick(item)} className={selectedItem?.id === item.id ? 'selected' : ''}>
                                     <td>{item.id}</td>
-                                    <td>{item.equipoId}</td>
-                                    <td>{item.usuarioId}</td>
+                                    <td>{item.usuario || 'N/A'}</td>
+                                    <td>{item.area}</td>
+                                    <td>{item.tipo}</td>
+                                    <td>{item.marca}</td>
                                     <td>{formatDate(item.fecha)}</td>
-                                    <td>{item.observaciones || 'N/A'}</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -99,14 +90,25 @@ function CopiasPage() {
                 </div>
             )}
 
-            {selectedItem && detailedData && (
-                <div className="details-panel card">
-                    <h3>Detalles de la Copia de Seguridad #{detailedData.id}</h3>
-                    <p><strong>Equipo ID:</strong> {detailedData.equipoId}</p>
-                    <p><strong>Usuario ID:</strong> {detailedData.usuarioId}</p>
-                    <p><strong>Fecha:</strong> {formatDate(detailedData.fecha)}</p>
-                    <p><strong>Observaciones:</strong> {detailedData.observaciones || 'N/A'}</p>
-                    <button className="close-details-btn" onClick={() => setSelectedItem(null)}>×</button>
+            {selectedItem && (
+                <div className="details-modal" onClick={() => setSelectedItem(null)}>
+                    <div className="details-panel card" onClick={(e) => e.stopPropagation()}> {/* Eliminar el botón de cerrar */}
+                        <button className="close-details-btn" onClick={() => setSelectedItem(null)}>×</button>
+                        {detailedData ? (
+                            <>
+                                <div className="details-header">
+                                    <h3>Detalles de la Copia de Seguridad #{detailedData.id}</h3>
+                                </div>
+                                <div className="details-grid">
+                                    <div className="detail-item"><span>Usuario:</span><p>{detailedData.usuario || 'N/A'}</p></div>
+                                    <div className="detail-item"><span>Área:</span><p>{detailedData.area}</p></div>
+                                    <div className="detail-item"><span>Tipo de Equipo:</span><p>{detailedData.tipo}</p></div>
+                                    <div className="detail-item"><span>Marca:</span><p>{detailedData.marca}</p></div>
+                                    <div className="detail-item"><span>Fecha de Copia:</span><p>{formatDate(detailedData.fecha)}</p></div>
+                                </div>
+                            </>
+                        ) : <div className="loading-message">Cargando...</div>}
+                    </div>
                 </div>
             )}
         </div>

@@ -21,8 +21,11 @@ function Login({ onForgot, onLogin }) {
             console.log('login response', resp.data);
 
             const token = resp?.data?.body;
-
-            if (onLogin) onLogin(token);
+            if (token) {
+                localStorage.setItem('authToken', token);
+                localStorage.setItem('username', user); // Guardar el nombre de usuario
+                if (onLogin) onLogin(token, user); // Pasar el nombre de usuario al callback onLogin
+            }
         } catch (err) {
             console.error('Login error', err);
             const message = err?.response?.data?.message || err.message || 'Error en el login';
@@ -76,9 +79,11 @@ function Login({ onForgot, onLogin }) {
                         <button className="btn primary" type="submit">
                             Iniciar sesión
                         </button>
-
+                    
                         <div className="alt-links">
-                            <a className="link small" href="/registro">Crear cuenta</a>
+                            <button type="button" className="link tiny" onClick={(e) => { e.preventDefault(); onForgot && onregistro(); }} style={{color: 'var(--primary)', background:'none',border:'none',padding:0,marginTop:8}}>
+                                ¿No tienes una cuenta? Regístrate
+                            </button>
                             <button type="button" className="link tiny" onClick={(e) => { e.preventDefault(); onForgot && onForgot(); }} style={{color: 'var(--primary)', background:'none',border:'none',padding:0,marginTop:8}}>
                                 ¿Olvidaste tu contraseña?
                             </button>
@@ -86,7 +91,9 @@ function Login({ onForgot, onLogin }) {
                     </div>
                 </form>
 
-                <footer className="login-footer"><small>© {new Date().getFullYear()} Gestión Informática</small></footer>
+                <footer className="login-footer">
+                    <small>© {new Date().getFullYear()} Gestión Informática</small><div className='Logoinstitucional'></div>
+                </footer>
             </section>
         </main>
     );
