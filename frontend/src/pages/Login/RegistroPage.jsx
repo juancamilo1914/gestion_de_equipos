@@ -3,9 +3,10 @@ import './RegistroPage.css';
 import '../../index.css';
 import api from '../../api/axios';
 
-function RegistroPage() {
+function RegistroPage({ onBack }) {
     const [nombre, setNombre] = useState('');
     const [correo, setCorreo] = useState('');
+    const [usuario, setUsuario] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
@@ -28,6 +29,7 @@ function RegistroPage() {
             await api.post('/auth/register', {
                 nombre,
                 correo,
+                usuario,
                 contraseña: password,
             });
             
@@ -35,6 +37,7 @@ function RegistroPage() {
             // Limpiar formulario tras el éxito
             setNombre('');
             setCorreo('');
+            setUsuario('');
             setPassword('');
             setConfirmPassword('');
 
@@ -56,7 +59,8 @@ function RegistroPage() {
                     <p className="subtitle">Únete a la plataforma de gestión</p>
                 </div>
 
-                <form className="registro-card" onSubmit={handleSubmit}>
+                <form className="registro-card" onSubmit={handleSubmit} aria-describedby="desc">
+                    <p id="desc" className="sr-only">Ingresa tu nombre, correo y contraseña para crear una cuenta</p>
                     {error && <div className="form-message error">{error}</div>}
                     {success && <div className="form-message success">{success}</div>}
 
@@ -91,6 +95,21 @@ function RegistroPage() {
                     </div>
 
                     <div className="field">
+                        <label htmlFor="input-usuario">Nombre de usuario</label>
+                        <div className="input-wrap">
+                            <input
+                                id="input-usuario"
+                                value={usuario}
+                                onChange={(e) => setUsuario(e.target.value)}
+                                type="text"
+                                placeholder="Tu nombre de usuario"
+                                required
+                                autoComplete="username"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="field">
                         <label htmlFor="input-pass-reg">Contraseña</label>
                         <div className="input-wrap">
                             <input id="input-pass-reg" value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="********" required autoComplete="new-password" />
@@ -108,10 +127,12 @@ function RegistroPage() {
                         <button className="btn primary" type="submit" disabled={loading}>
                             {loading ? 'Creando...' : 'Crear cuenta'}
                         </button>
-                        <a className="link small" href="/login">¿Ya tienes una cuenta? Inicia sesión</a>
+                        <button type="button" className="link small" onClick={onBack} style={{color: 'var(--primary)', background:'none',border:'none',padding:0,marginTop:8,cursor:'pointer'}}>
+                            ¿Ya tienes una cuenta? Inicia sesión
+                        </button>
                     </div>
                 </form>
-                <footer className="registro-footer"><small>© {new Date().getFullYear()} Gestión Informática</small></footer>
+                <footer className="registro-footer"><small>© {new Date().getFullYear()} Gestión Informática</small><div className='Logoinstitucional'></div></footer>
             </section>
         </main>
     );

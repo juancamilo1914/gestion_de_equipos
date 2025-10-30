@@ -21,6 +21,7 @@ async function agregar(body){
     const usuario = {
     id: body.id,
     nombre: body.nombre,
+    correo: body.correo,
     activo: body.activo
 }
 
@@ -33,17 +34,15 @@ const respuesta = await db.agregar(TABLA, usuario);
         insertID = body.id;
 }
 
-var respuesta2 = '';
-
 if(body.usuario || body.password){
-        respuesta2 = await auth.agregar({
+        await auth.agregar({
         id: insertID,
         usuario: body.usuario,
         password: body.password
     })
 }
 
-return respuesta2;
+return insertID;
 }
 
     function eliminar(body){

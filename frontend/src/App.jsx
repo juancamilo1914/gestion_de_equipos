@@ -2,6 +2,7 @@ import './App.css'
 import React, { useState } from 'react'
 import Login from './pages/Login/Login.jsx'
 import OlvidasteLaContraseña from './pages/Login/olvidasteLaContraseña.jsx'
+import RegistroPage from './pages/Login/RegistroPage.jsx'
 import Home from './pages/home/home.jsx'
 
 function decodeJwt(token){
@@ -38,7 +39,7 @@ function App() {
     <>
       <div>
         {view === 'login' && (
-          <Login onForgot={() => setView('forgot')} onLogin={(token) => handleLogin(token)} />
+          <Login onForgot={() => setView('forgot')} onLogin={(token) => handleLogin(token)} onRegistro={() => setView('registro')} />
         )}
 
         {view === 'forgot' && (

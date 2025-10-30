@@ -3,7 +3,7 @@ import './Login.css';
 import '../../index.css';
 import api from '../../api/axios';
 
-function Login({ onForgot, onLogin }) {
+function Login({ onForgot, onLogin, onRegistro }) {
     const [user, setUser] = useState('');
     const [pass, setPass] = useState('');
 
@@ -81,7 +81,7 @@ function Login({ onForgot, onLogin }) {
                         </button>
                     
                         <div className="alt-links">
-                            <button type="button" className="link tiny" onClick={(e) => { e.preventDefault(); onForgot && onregistro(); }} style={{color: 'var(--primary)', background:'none',border:'none',padding:0,marginTop:8}}>
+                            <button type="button" className="link tiny" onClick={(e) => { e.preventDefault(); onRegistro && onRegistro(); }} style={{color: 'var(--primary)', background:'none',border:'none',padding:0,marginTop:8}}>
                                 ¿No tienes una cuenta? Regístrate
                             </button>
                             <button type="button" className="link tiny" onClick={(e) => { e.preventDefault(); onForgot && onForgot(); }} style={{color: 'var(--primary)', background:'none',border:'none',padding:0,marginTop:8}}>
