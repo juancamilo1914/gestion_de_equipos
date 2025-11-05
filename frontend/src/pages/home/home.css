@@ -60,7 +60,7 @@ html,body,#root{height:100%}
 .hero-left h2{margin-top:36px;margin-bottom:6px;font-size:28px}
 .username{color:#111827}
 .reminders{min-height:120px;border-radius:10px;background:#fff;padding:12px}
-.reminder-item{display:flex;flex-direction:column;gap:6px}
+.reminder-item{display:flex;flex-direction:column;gap:6px; padding:8px;border-bottom:1px solid rgba(0,0,0,0.05); background-color: #fff;}
 .reminder-title{font-weight:700}
 .reminder-date{font-size:12px;color:var(--muted)}
 
@@ -290,4 +290,150 @@ html,body,#root{height:100%}
   .stats-cards{flex-direction:column}
   .hero{flex-direction:column}
   .hero-right{width:100%}
+}
+
+/* Estilos para ventanas flotantes */
+.floating-window {
+  background-color: var(--card, #ffffff);
+  border-radius: var(--radius, 12px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  width: 500px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow: hidden;
+  animation: fadeInScale 0.3s ease-out;
+  position: relative;
+}
+
+.window-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, var(--primary, #0ea5a1), var(--accent, #2563eb));
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-top-left-radius: var(--radius, 12px);
+  border-top-right-radius: var(--radius, 12px);
+}
+
+.window-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: white;
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: color 0.2s ease, transform 0.2s ease;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.window-content {
+  padding: 1.5rem;
+  overflow-y: auto;
+  max-height: calc(80vh - 80px);
+  background-color: var(--card, #ffffff);
+  border-bottom-left-radius: var(--radius, 12px);
+  border-bottom-right-radius: var(--radius, 12px);
+}
+
+/* Estilos para formularios en modales */
+.window-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.window-content input,
+.window-content textarea {
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.window-content input:focus,
+.window-content textarea:focus {
+  outline: none;
+  border-color: var(--primary, #0ea5a1);
+  box-shadow: 0 0 0 3px rgba(14, 165, 161, 0.1);
+}
+
+.window-content textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.window-content .action-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.window-content .action-btn[type="submit"] {
+  background: linear-gradient(135deg, var(--primary, #0ea5a1), var(--accent, #2563eb));
+  color: white;
+}
+
+.window-content .action-btn[type="submit"]:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(14, 165, 161, 0.3);
+}
+
+.window-content .action-btn[type="button"] {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.window-content .action-btn[type="button"]:hover {
+  background-color: #e5e7eb;
+}
+
+.window-content .action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Estilos para modal-overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

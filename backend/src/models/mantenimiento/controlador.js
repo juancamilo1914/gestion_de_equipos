@@ -51,14 +51,14 @@ function agregar(body){
         usuario: body.usuario,
         area: body.area,
         tipo: body.tipo,
-        fecha_ultimo_mantenimiento: body.fecha_ultimo_mantenimiento,
-        fecha_actual_de_mantenimiento: body.fecha_actual_de_mantenimiento,
-        firmas: body.firmas,
+        fecha_ultimo_mantenimiento: body.fecha_ultimo_mantenimiento || '2023-01-01',
+        fecha_actual_de_mantenimiento: body.fecha_actual_de_mantenimiento || '2023-01-01',
+        firmas: body.firmas || '',
         marca: body.marca,
-        actividades_realizadas: body.actividades_realizadas,
-        observaciones: body.observaciones,
-        fecha_de_elaboracion: body.fecha_de_elaboracion,
-        fecha_de_ejecucion: body.fecha_de_ejecucion,
+        actividades_realizadas: body.actividades_realizadas || '',
+        observaciones: body.observaciones || '',
+        fecha_de_elaboracion: body.fecha_de_elaboracion || '2023-01-01',
+        fecha_de_ejecucion: body.fecha_de_ejecucion || '2023-01-01',
     };
 
     return db.agregar(TABLA, authData);

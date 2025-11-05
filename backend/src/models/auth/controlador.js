@@ -26,6 +26,9 @@ module.exports = function (dbInyectada){
                     throw new Error('Usuario o contraseña inválidos');
                 }
             })
+            .catch(err => {
+                throw new Error('Usuario o contraseña inválidos');
+            });
     }
 
     async function agregar(data){

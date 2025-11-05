@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import './copiasPage.css';
 import api from '../../api/axios';
 import moment from 'moment';
+import AgregarCopiasPage from '../home/AgregarCopiasPage';
 
 function CopiasPage() {
     const [copiasData, setCopiasData] = useState([]);
@@ -9,6 +10,7 @@ function CopiasPage() {
     const [error, setError] = useState(null);
     const [selectedItem, setSelectedItem] = useState(null);
     const [detailedData, setDetailedData] = useState(null);
+    const [showAgregarCopiasModal, setShowAgregarCopiasModal] = useState(false);
 
     useEffect(() => {
         fetchCopiasData();
@@ -48,9 +50,14 @@ function CopiasPage() {
         <div className="copias-page">
             <div className="page-header">
                 <h2 className="page-title">Gestión de Copias de Seguridad</h2>
-                <button className="refresh-btn" onClick={fetchCopiasData} disabled={loading}>
-                    {loading ? 'Cargando...' : 'Actualizar Datos'}
-                </button>
+                <div className="page-actions">
+                    <button className="refresh-btn" onClick={fetchCopiasData} disabled={loading}>
+                        {loading ? 'Cargando...' : 'Actualizar Datos'}
+                    </button>
+                    <button className="add-btn" onClick={() => setShowAgregarCopiasModal(true)}>
+                        Agregar Copia de Seguridad
+                    </button>
+                </div>
             </div>
 
             {error && <div className="error-message">{error}</div>}
@@ -108,6 +115,21 @@ function CopiasPage() {
                                 </div>
                             </>
                         ) : <div className="loading-message">Cargando...</div>}
+                    </div>
+                </div>
+            )}
+
+            {/* Modal para agregar copia de seguridad */}
+            {showAgregarCopiasModal && (
+                <div className="modal-overlay" onClick={() => setShowAgregarCopiasModal(false)}>
+                    <div className="floating-window" onClick={(e) => e.stopPropagation()}>
+                        <div className="window-header">
+                            <h3>Agregar Copia de Seguridad</h3>
+                            <button className="close-btn" onClick={() => setShowAgregarCopiasModal(false)}>×</button>
+                        </div>
+                        <div className="window-content">
+                            <AgregarCopiasPage onAgregado={() => { setShowAgregarCopiasModal(false); fetchCopiasData(); }} />
+                        </div>
                     </div>
                 </div>
             )}

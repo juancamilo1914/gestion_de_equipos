@@ -1,5 +1,5 @@
 import './App.css'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Login from './pages/Login/Login.jsx'
 import OlvidasteLaContraseña from './pages/Login/olvidasteLaContraseña.jsx'
 import RegistroPage from './pages/Login/RegistroPage.jsx'
@@ -21,6 +21,25 @@ function App() {
   const [view, setView] = useState('login')
   const [token, setToken] = useState(null)
   const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    // Verificar si hay un token guardado en localStorage al cargar la app
+    const savedToken = localStorage.getItem('authToken');
+    const savedUsername = localStorage.getItem('username');
+    if (savedToken && savedUsername) {
+      // Verificar si el token es válido (no expirado)
+      const payload = decodeJwt(savedToken);
+      if (payload && payload.exp && payload.exp * 1000 > Date.now()) {
+        setToken(savedToken);
+        setUser(savedUsername);
+        setView('home');
+      } else {
+        // Token expirado, limpiar localStorage
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('username');
+      }
+    }
+  }, []);
 
   const handleLogin = (tokenValue) =>{
     if(!tokenValue) return setView('login');

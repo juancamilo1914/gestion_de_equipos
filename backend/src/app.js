@@ -8,6 +8,7 @@ const cors = require('cors');
 const clientes = require('./models/clientes/rutas');
 const usuarios = require('./models/usuarios/rutas');
 const auth = require('./models/auth/rutas');
+const equipos = require('./models/equipos/rutas');
 const CopiasDeSeguridad = require('./models/CopiasDeSeguridad/rutas');
 const impresoras = require('./models/impresoras/rutas');
 const licenciamiento = require('./models/licenciamiento/rutas');
@@ -21,7 +22,7 @@ const app = express();
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(cors({ origin: ["http://localhost:5173", "http://localhost:4173"] }));
 
 
 //config
@@ -35,6 +36,7 @@ app.set('port', config.app.port);
 app.use('/api/clientes', clientes);
 app.use('/api/usuarios', usuarios);
 app.use('/api/auth', auth);
+app.use('/api/equipos', equipos);
 app.use('/api/CopiasDeSeguridad', CopiasDeSeguridad);
 app.use('/api/impresoras', impresoras);
 app.use('/api/licenciamiento', licenciamiento);

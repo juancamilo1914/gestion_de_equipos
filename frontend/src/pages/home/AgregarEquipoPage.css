@@ -37,18 +37,41 @@
     font-weight: 600;
 }
 
-.form-grid input {
+.form-grid input,
+.form-grid select {
     padding: 0.8rem;
     border: 1px solid #ccc;
     border-radius: 6px;
     font-size: 1rem;
     transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: #fff;
 }
 
-.form-grid input:focus {
+.form-grid input:focus,
+.form-grid select:focus {
     outline: none;
     border-color: var(--primary, #2563eb);
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.form-grid select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.8rem center;
+    background-size: 1rem;
+    padding-right: 2.5rem;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.form-grid select:hover {
+    border-color: #999;
+}
+
+.form-grid select:focus {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
 }
 
 .full-width {

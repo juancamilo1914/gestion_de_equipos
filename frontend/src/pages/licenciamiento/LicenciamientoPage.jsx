@@ -3,6 +3,7 @@ import './licenciamientoPage.css';
 import api from '../../api/axios';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import AgregarLicenciamientoPage from '../home/AgregarLicenciamientoPage';
 
 function LicenciamientoPage() {
     const [licenciamientoData, setLicenciamientoData] = useState([]);
@@ -15,6 +16,7 @@ function LicenciamientoPage() {
     const [editFormData, setEditFormData] = useState(null);
     const [equipos, setEquipos] = useState([]); // Nuevo estado para almacenar los equipos
     const [selectedEquipoId, setSelectedEquipoId] = useState(''); // Estado para el equipo seleccionado en el dropdown
+    const [showAgregarLicenciamientoModal, setShowAgregarLicenciamientoModal] = useState(false);
 
     useEffect(() => {
         fetchLicenciamientoData();
@@ -172,9 +174,14 @@ function LicenciamientoPage() {
         <div className="licenciamiento-page">
             <div className="page-header">
                 <h2 className="page-title">Gestión de Licenciamiento</h2>
-                <button className="refresh-btn" onClick={fetchLicenciamientoData} disabled={loading}>
-                    {loading ? 'Cargando...' : 'Actualizar Datos'}
-                </button>
+                <div className="page-actions">
+                    <button className="refresh-btn" onClick={fetchLicenciamientoData} disabled={loading}>
+                        {loading ? 'Cargando...' : 'Actualizar Datos'}
+                    </button>
+                    <button className="add-btn" onClick={() => setShowAgregarLicenciamientoModal(true)}>
+                        Agregar Licenciamiento
+                    </button>
+                </div>
             </div>
 
             {error && <div className="error-message">{error}</div>}
@@ -276,6 +283,21 @@ function LicenciamientoPage() {
                         ) : (
                             <div className="error-message">No se pudieron cargar los detalles.</div>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* Modal para agregar licenciamiento */}
+            {showAgregarLicenciamientoModal && (
+                <div className="modal-overlay" onClick={() => setShowAgregarLicenciamientoModal(false)}>
+                    <div className="floating-window" onClick={(e) => e.stopPropagation()}>
+                        <div className="window-header">
+                            <h3>Agregar Licenciamiento</h3>
+                            <button className="close-btn" onClick={() => setShowAgregarLicenciamientoModal(false)}>×</button>
+                        </div>
+                        <div className="window-content">
+                            <AgregarLicenciamientoPage onAgregado={() => { setShowAgregarLicenciamientoModal(false); fetchLicenciamientoData(); }} />
+                        </div>
                     </div>
                 </div>
             )}

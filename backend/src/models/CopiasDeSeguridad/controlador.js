@@ -13,16 +13,12 @@ function todos(){
 
 function agregar(body){
     const authData = {
-        id: body.id,
+        usuario: body.usuario,
         area: body.area,
         tipo: body.tipo,
         marca: body.marca,
-        fecha: body.fecha,
+        fecha: body.fecha || '2023-01-01',
     };
-
-    if(body.usuario){
-        authData.usuario = body.usuario
-    }
 
     return db.agregar(TABLA, authData);
 }

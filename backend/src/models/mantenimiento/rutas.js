@@ -13,7 +13,7 @@ const upload = multer({ storage: storage });
 router.get('/', todos);
 router.get ('/:id', uno);
 router.post('/', agregar);
-router.put('/:id', upload.single('firma'), modificar); // Agregar middleware para subir archivo en PUT
+router.put('/:id', modificar); // Agregar middleware para subir archivo en PUT
 router.delete('/:id', eliminar);
 
 

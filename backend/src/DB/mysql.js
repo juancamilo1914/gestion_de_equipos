@@ -67,7 +67,11 @@ function eliminar(tabla, data){
 
 function query(tabla, consulta){
     return new Promise( (resolve, reject) => {
-        conexion.query(`SELECT * FROM ${tabla} WHERE ?`, consulta, (error, result) => {
+        const keys = Object.keys(consulta);
+        const values = Object.values(consulta);
+        const whereClause = keys.map(key => `${key} = ?`).join(' AND ');
+        const sql = `SELECT * FROM ${tabla} WHERE ${whereClause}`;
+        conexion.query(sql, values, (error, result) => {
             return error ? reject(error) : resolve(result[0]);
         })
     });

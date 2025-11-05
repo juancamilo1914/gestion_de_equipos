@@ -43,14 +43,13 @@ function uno(id){
 
 function agregar(body){
     const authData = {
-        id: body.id,
         usuario: body.usuario,
         area: body.area,
         tipo: body.tipo,
-        descripcion: body.descripcion,
-        sistema_operativo: body.sistema_operativo,
-        software_de_oficina: body.software_de_oficina,
-        otro_software: body.otro_software,
+        descripcion: body.descripcion || '',
+        sistema_operativo: body.sistema_operativo || '',
+        software_de_oficina: body.software_de_oficina || '',
+        otro_software: body.otro_software || '',
     };
 
     return db.agregar(TABLA, authData);

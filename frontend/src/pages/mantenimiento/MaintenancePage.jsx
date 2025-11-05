@@ -6,6 +6,7 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import AgregarMantenimientoPage from '../home/AgregarMantenimientoPage';
 
 // Configuración para el calendario en español
 moment.locale('es', {
@@ -34,6 +35,7 @@ function MaintenancePage() {
     const [signatureImage, setSignatureImage] = useState(null);
     const [equipos, setEquipos] = useState([]); // Nuevo estado para almacenar los equipos
     const [selectedEquipoId, setSelectedEquipoId] = useState(''); // Estado para el equipo seleccionado en el dropdown
+    const [showAgregarMantenimientoModal, setShowAgregarMantenimientoModal] = useState(false);
 
     useEffect(() => {
         fetchMaintenanceData();
@@ -145,38 +147,13 @@ function MaintenancePage() {
             // 1. Preparamos los datos para enviar, creando una copia para no modificar el estado directamente.
             const dataToSave = { ...editFormData };
 
-            // 2. Si el tipo de firma es 'imagen' y hay una imagen cargada, la asignamos.
-            if (signatureType === 'image' && signatureImage) {
-                // Aseguramos que el objeto de firmas exista antes de asignarle la propiedad.
-                dataToSave.firmas = { ...dataToSave.firmas, tecnico: signatureImage };
-            }
+            // 2. El backend espera que el campo 'firmas' sea un string JSON.
+            dataToSave.firmas = JSON.stringify(dataToSave.firmas || {}); // Aseguramos que firmas sea un JSON
 
-            // 3. El backend espera que el campo 'firmas' sea un string JSON.
-            // Lo convertimos solo para el envío, no en el estado local.
-            const payload = new FormData();
-            Object.keys(dataToSave).forEach(key => {
-                if (key !== 'firmas') {
-                    payload.append(key, dataToSave[key]);
-                }
-            });
-            payload.append('firmas', JSON.stringify(dataToSave.firmas || {})); // Aseguramos que firmas sea un JSON
+            // 3. Enviamos la petición PUT al backend con los datos en JSON.
+            await api.put(`/mantenimiento/${detailedData.id}`, dataToSave);
 
-            // Si hay una imagen de firma subida, agregarla al FormData
-            if (signatureType === 'image' && signatureImage && signatureImage.startsWith('data:image')) {
-                // Convertir base64 a blob para subir como archivo
-                const response = await fetch(signatureImage);
-                const blob = await response.blob();
-                payload.append('firma', blob, 'firma.png'); // Nombre del archivo
-            }
-
-            // 4. Enviamos la petición PUT al backend con los datos procesados (usando FormData para archivos).
-            await api.put(`/mantenimiento/${detailedData.id}`, payload, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-
-            // 5. Actualizamos el estado local para reflejar los cambios inmediatamente.
+            // 4. Actualizamos el estado local para reflejar los cambios inmediatamente.
             // Para asegurar que vemos los datos correctos (ej. firmas parseadas si el backend las devuelve)
             // es mejor volver a pedir los datos del item.
             const response = await api.get(`/mantenimiento/${detailedData.id}`);
@@ -338,9 +315,12 @@ function MaintenancePage() {
         <div className="maintenance-page">
             <div className="page-header">
                 <h2 className="page-title">Gestión de Mantenimiento</h2>
-                <button className="refresh-btn" onClick={fetchMaintenanceData} disabled={loading}>
-                    {loading ? 'Cargando...' : 'Actualizar Datos'}
-                </button>
+                <div className="page-actions">
+                    <button className="refresh-btn" onClick={fetchMaintenanceData} disabled={loading}>
+                        {loading ? 'Cargando...' : 'Actualizar Datos'}
+                    </button>
+                    <button className="add-btn" onClick={() => setShowAgregarMantenimientoModal(true)}>Agregar Mantenimiento</button>
+                </div>
             </div>
 
             {error && <div className="error-message">{error}</div>}
@@ -511,6 +491,21 @@ function MaintenancePage() {
                         ) : (
                             <div className="error-message">No se pudieron cargar los detalles.</div>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Agregar Mantenimiento */}
+            {showAgregarMantenimientoModal && (
+                <div className="modal-overlay" onClick={() => setShowAgregarMantenimientoModal(false)}>
+                    <div className="floating-window" onClick={(e) => e.stopPropagation()}>
+                        <div className="window-header">
+                            <h3>Agregar Mantenimiento</h3>
+                            <button className="close-btn" onClick={() => setShowAgregarMantenimientoModal(false)}>×</button>
+                        </div>
+                        <div className="window-content">
+                            <AgregarMantenimientoPage onAgregado={() => { setShowAgregarMantenimientoModal(false); fetchMaintenanceData(); }} />
+                        </div>
                     </div>
                 </div>
             )}

@@ -22,7 +22,7 @@ async function login (req, res, next){
 
 async function register(req, res, next) {
     try {
-        const { nombre, correo, usuario, contraseña } = req.body;
+        const { nombre, correo, usuario, password } = req.body;
         // Crear usuario en la tabla usuarios
         const usuarioData = {
             id: 0, // Para insertar nuevo
@@ -36,7 +36,7 @@ async function register(req, res, next) {
         const authData = {
             id: insertID, // Usar el ID del usuario insertado
             usuario: usuario, // Usar el nombre de usuario proporcionado
-            password: contraseña
+            password: password
         };
         await controlador.agregar(authData);
 

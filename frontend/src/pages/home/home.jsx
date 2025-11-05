@@ -6,6 +6,10 @@ import LicenciamientoPage from '../licenciamiento/LicenciamientoPage';
 import CopiasPage from '../copiasDeSeguridad/CopiasPage';
 import ImpresorasPage from '../impresoras/ImpresorasPage';
 import AgregarEquipoPage from './AgregarEquipoPage'; // Corregir la ruta de importación
+import GestionEquiposPage from './GestionEquiposPage';
+import AgregarMantenimientoPage from './AgregarMantenimientoPage';
+import AgregarLicenciamientoPage from './AgregarLicenciamientoPage';
+import AgregarCopiasPage from './AgregarCopiasPage';
 import UserSettingsModal from './UserSettingsModal'; // Importar modal de usuario
 import AppSettingsModal from './AppSettingsModal'; // Importar modal de app
 
@@ -16,6 +20,10 @@ function Home({ onBack, username }) {
     const [showNotifications, setShowNotifications] = useState(false);
     const [showUserSettings, setShowUserSettings] = useState(false);
     const [showAppSettings, setShowAppSettings] = useState(false); // Estado para el nuevo modal
+    // Estados para modales de agregar
+    const [showAgregarMantenimientoModal, setShowAgregarMantenimientoModal] = useState(false);
+    const [showAgregarLicenciamientoModal, setShowAgregarLicenciamientoModal] = useState(false);
+    const [showAgregarCopiasModal, setShowAgregarCopiasModal] = useState(false);
     const notificationsRef = useRef(null);
 
     const [currentView, setCurrentView] = useState('dashboard'); // Nuevo estado para controlar la vista actual
@@ -154,13 +162,13 @@ function Home({ onBack, username }) {
             <aside className="sidebar">
                 <div className="sidebar-top">
                     <div className="sidebar-brand">GESTION DE<br/>EQUIPOS</div>
-                    <nav className="side-nav"> 
+                    <nav className="side-nav">
                         <button className={currentView === 'dashboard' ? 'nav-btn active' : 'nav-btn'} onClick={() => setCurrentView('dashboard')}>DASHBOARD</button> {/* Agregado botón para volver al dashboard */}
                         <button className={currentView === 'mantenimiento' ? 'nav-btn active' : 'nav-btn'} onClick={() => setCurrentView('mantenimiento')}>MANTENIMIENTO</button>
                         <button className={currentView === 'licenciamiento' ? 'nav-btn active' : 'nav-btn'} onClick={() => setCurrentView('licenciamiento')}>LICENCIAMIENTO</button>
                         <button className={currentView === 'copias' ? 'nav-btn active' : 'nav-btn'} onClick={() => setCurrentView('copias')}>COPIAS DE SEGURIDAD</button>
                         <button className={currentView === 'impresoras' ? 'nav-btn active' : 'nav-btn'} onClick={() => setCurrentView('impresoras')}>IMPRESORAS</button>
-                        <button className={currentView === 'agregarEquipo' ? 'nav-btn active' : 'nav-btn'} onClick={() => setCurrentView('agregarEquipo')}>AGREGAR EQUIPO</button>
+                        <button className={currentView === 'gestionEquipos' ? 'nav-btn active' : 'nav-btn'} onClick={() => setCurrentView('gestionEquipos')}>GESTIÓN EQUIPOS</button>
                     </nav>
                 </div>
                 {/* Eliminada configuración duplicada: usar icono en topbar */}
@@ -217,9 +225,9 @@ function Home({ onBack, username }) {
                                 <div className="quick-actions-dashboard"> {/* Nuevo contenedor para acciones rápidas */}
                                     <h4>Acciones rápidas</h4>
                                     <div className="quick-actions">
-                                        <button className="action-btn" onClick={() => setCurrentView('mantenimiento')}>Mantenimiento</button>
-                                        <button className="action-btn" onClick={() => setCurrentView('licenciamiento')}>Licenciamiento</button>
-                                        <button className="action-btn" onClick={() => setCurrentView('copias')}>Copias de Seguridad</button>
+                                        <button className="action-btn" onClick={() => setShowAgregarMantenimientoModal(true)}>Agregar Mantenimiento</button>
+                                        <button className="action-btn" onClick={() => setShowAgregarLicenciamientoModal(true)}>Agregar Licenciamiento</button>
+                                        <button className="action-btn" onClick={() => setShowAgregarCopiasModal(true)}>Agregar Copias</button>
                                         <button className="action-btn" onClick={() => { setShowForm(s => !s); setEditingId(null); setFormTitle(''); setFormDateTime(''); }}>{showForm ? 'Cancelar' : 'Crear recordatorio'}</button>
                                     </div>
 
@@ -267,15 +275,19 @@ function Home({ onBack, username }) {
                 )}
 
                 {currentView === 'mantenimiento' && <MaintenancePage />}
-                {currentView === 'licenciamiento' && <LicenciamientoPage />} 
-                {currentView === 'copias' && <CopiasPage />} 
+                {currentView === 'licenciamiento' && <LicenciamientoPage />}
+                {currentView === 'copias' && <CopiasPage />}
                 {currentView === 'impresoras' && <ImpresorasPage />}
+                {currentView === 'gestionEquipos' && <GestionEquiposPage />}
                 {currentView === 'agregarEquipo' && <AgregarEquipoPage onEquipoAgregado={() => setCurrentView('dashboard')} />}
+                {currentView === 'agregarMantenimiento' && <AgregarMantenimientoPage onAgregado={() => setCurrentView('dashboard')} />}
+                {currentView === 'agregarLicenciamiento' && <AgregarLicenciamientoPage onAgregado={() => setCurrentView('dashboard')} />}
+                {currentView === 'agregarCopias' && <AgregarCopiasPage onAgregado={() => setCurrentView('dashboard')} />}
 
             </main>
 
             {/* backdrop para modales y sidebar */}
-            {(sidebarOpen || showNotifications || showUserSettings || showAppSettings) && <div className="backdrop" onClick={() => { setSidebarOpen(false); setShowNotifications(false); setShowUserSettings(false); setShowAppSettings(false); }} />}
+            {(sidebarOpen || showNotifications || showUserSettings || showAppSettings || showAgregarMantenimientoModal || showAgregarLicenciamientoModal || showAgregarCopiasModal) && <div className="backdrop" onClick={() => { setSidebarOpen(false); setShowNotifications(false); setShowUserSettings(false); setShowAppSettings(false); setShowAgregarMantenimientoModal(false); setShowAgregarLicenciamientoModal(false); setShowAgregarCopiasModal(false); }} />}
 
 
 
@@ -325,6 +337,51 @@ function Home({ onBack, username }) {
             {/* Modal de Ajustes de la Aplicación */}
             {showAppSettings && (
                 <AppSettingsModal onClose={() => setShowAppSettings(false)} />
+            )}
+
+            {/* Ventana Flotante Agregar Mantenimiento */}
+            {showAgregarMantenimientoModal && (
+                <div className="modal-overlay" onClick={() => setShowAgregarMantenimientoModal(false)}>
+                    <div className="floating-window" onClick={(e) => e.stopPropagation()}>
+                        <div className="window-header">
+                            <h3>Agregar Mantenimiento</h3>
+                            <button className="close-btn" onClick={() => setShowAgregarMantenimientoModal(false)}>×</button>
+                        </div>
+                        <div className="window-content">
+                            <AgregarMantenimientoPage onAgregado={() => { setShowAgregarMantenimientoModal(false); fetchReminders(); }} />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Ventana Flotante Agregar Licenciamiento */}
+            {showAgregarLicenciamientoModal && (
+                <div className="modal-overlay" onClick={() => setShowAgregarLicenciamientoModal(false)}>
+                    <div className="floating-window" onClick={(e) => e.stopPropagation()}>
+                        <div className="window-header">
+                            <h3>Agregar Licenciamiento</h3>
+                            <button className="close-btn" onClick={() => setShowAgregarLicenciamientoModal(false)}>×</button>
+                        </div>
+                        <div className="window-content">
+                            <AgregarLicenciamientoPage onAgregado={() => setShowAgregarLicenciamientoModal(false)} />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Ventana Flotante Agregar Copias */}
+            {showAgregarCopiasModal && (
+                <div className="modal-overlay" onClick={() => setShowAgregarCopiasModal(false)}>
+                    <div className="floating-window" onClick={(e) => e.stopPropagation()}>
+                        <div className="window-header">
+                            <h3>Agregar Copia de Seguridad</h3>
+                            <button className="close-btn" onClick={() => setShowAgregarCopiasModal(false)}>×</button>
+                        </div>
+                        <div className="window-content">
+                            <AgregarCopiasPage onAgregado={() => setShowAgregarCopiasModal(false)} />
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
