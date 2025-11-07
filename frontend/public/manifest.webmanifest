@@ -9,7 +9,7 @@
   "theme_color": "#2563eb",
   "icons": [
     {
-      "src": "/src/assets/GeLogo.svg",
+      "src": "/GeLogo.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     }

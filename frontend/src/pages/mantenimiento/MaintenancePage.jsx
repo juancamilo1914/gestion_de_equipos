@@ -7,6 +7,8 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
+import logo from '../../assets/LOGO_INSTITUCIONAL.jpg';
+
 // Configuración para el calendario en español
 moment.locale('es', {
     months: 'Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre'.split('_'),
@@ -31,7 +33,6 @@ function MaintenancePage() {
     const [editFormData, setEditFormData] = useState(null);
     const [signatureType, setSignatureType] = useState('text');
     const [calendarDate, setCalendarDate] = useState(new Date());
-    const [signatureImage, setSignatureImage] = useState(null);
     const [equipos, setEquipos] = useState([]); // Nuevo estado para almacenar los equipos
     const [selectedEquipoId, setSelectedEquipoId] = useState(''); // Estado para el equipo seleccionado en el dropdown
 
@@ -77,7 +78,6 @@ function MaintenancePage() {
         }
         // Reset states when opening a new item
         setIsEditing(false);
-        setSignatureImage(null);
         setSelectedItem(item);
         setEditFormData(null);
         setLoadingDetails(true);
@@ -85,17 +85,6 @@ function MaintenancePage() {
             // Usamos el endpoint para obtener un solo registro
             const response = await api.get(`/mantenimiento/${item.id}`);
             const data = response.data.body;
-            // Aseguramos que 'firmas' sea un objeto, incluso si es null o un string JSON
-            try {
-                if (typeof data.firmas === 'string') {
-                    data.firmas = JSON.parse(data.firmas);
-                } else if (data.firmas === null || typeof data.firmas !== 'object') {
-                    data.firmas = {};
-                }
-            } catch (e) {
-                console.error("Error parsing firmas:", e);
-                data.firmas = {}; // Fallback a objeto vacío
-            }
             setDetailedData(data);
 
             // Centramos el calendario en la fecha del próximo mantenimiento si existe, si no, en la fecha actual.
@@ -123,19 +112,15 @@ function MaintenancePage() {
     }
 
     const handleEdit = () => {
-        // Aseguramos que firmas sea un objeto antes de copiar
-        const firmas = detailedData.firmas || {};
-        setEditFormData({ ...detailedData, firmas: { ...firmas } });
-        setSignatureType(firmas.tecnico?.startsWith('data:image') ? 'image' : 'text');
+        setEditFormData({ ...detailedData });
+        setSignatureType(detailedData.firmas_tecnico?.startsWith('data:image') ? 'image' : 'text');
         setSelectedEquipoId(equipos.find(eq => eq.usuario === detailedData.usuario && eq.area === detailedData.area && eq.tipo === detailedData.tipo && eq.marca === detailedData.marca)?.id || '');
-        setSignatureImage(firmas.tecnico?.startsWith('data:image') ? firmas.tecnico : null);
         setIsEditing(true);
     };
 
     const handleCancel = () => {
         setIsEditing(false);
         setEditFormData(null);
-        setSignatureImage(null);
         setSelectedEquipoId(''); // Limpiar selección de equipo
     };
 
@@ -145,34 +130,14 @@ function MaintenancePage() {
             // 1. Preparamos los datos para enviar, creando una copia para no modificar el estado directamente.
             const dataToSave = { ...editFormData };
 
-            // 2. Si el tipo de firma es 'imagen' y hay una imagen cargada, la asignamos.
-            if (signatureType === 'image' && signatureImage) {
-                // Aseguramos que el objeto de firmas exista antes de asignarle la propiedad.
-                dataToSave.firmas = { ...dataToSave.firmas, tecnico: signatureImage };
-            }
+            // Remove id and equipoId from the data to be saved
+            delete dataToSave.id;
+            delete dataToSave.equipoId;
 
-            // 3. El backend espera que el campo 'firmas' sea un string JSON.
-            // Lo convertimos solo para el envío, no en el estado local.
-            const payload = new FormData();
-            Object.keys(dataToSave).forEach(key => {
-                if (key !== 'firmas') {
-                    payload.append(key, dataToSave[key]);
-                }
-            });
-            payload.append('firmas', JSON.stringify(dataToSave.firmas || {})); // Aseguramos que firmas sea un JSON
-
-            // Si hay una imagen de firma subida, agregarla al FormData
-            if (signatureType === 'image' && signatureImage && signatureImage.startsWith('data:image')) {
-                // Convertir base64 a blob para subir como archivo
-                const response = await fetch(signatureImage);
-                const blob = await response.blob();
-                payload.append('firma', blob, 'firma.png'); // Nombre del archivo
-            }
-
-            // 4. Enviamos la petición PUT al backend con los datos procesados (usando FormData para archivos).
-            await api.put(`/mantenimiento/${detailedData.id}`, payload, {
+            // 4. Enviamos la petición PUT al backend con los datos procesados.
+            await api.put(`/mantenimiento/${detailedData.id}`, dataToSave, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
+                    'Content-Type': 'application/json',
                 },
             });
 
@@ -181,9 +146,6 @@ function MaintenancePage() {
             // es mejor volver a pedir los datos del item.
             const response = await api.get(`/mantenimiento/${detailedData.id}`);
             const updatedData = response.data.body;
-            if (typeof updatedData.firmas === 'string') {
-                updatedData.firmas = JSON.parse(updatedData.firmas || '{}');
-            }
             setDetailedData(updatedData);
             setIsEditing(false); // Salimos del modo edición.
             fetchMaintenanceData(); // Actualizamos la lista principal en segundo plano.
@@ -223,19 +185,18 @@ function MaintenancePage() {
                 // Si no se selecciona ningún equipo, limpiar los campos relacionados
                 setEditFormData(prev => ({ ...prev, usuario: '', area: '', tipo: '', marca: '' }));
             }
-        } else
-        if (name === "firma_tecnico_texto") {
-            setEditFormData(prev => ({ ...prev, firmas: { ...prev.firmas, tecnico: value } }));
         } else {
             setEditFormData(prev => ({ ...prev, [name]: value }));
         }
     };
 
-    const handleSignatureImageChange = (e) => {
+    const handleSignatureImageChange = (e, field) => {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onloadend = () => setSignatureImage(reader.result);
+            reader.onloadend = () => {
+                setEditFormData(prev => ({ ...prev, [field]: reader.result }));
+            };
             reader.readAsDataURL(file);
         }
     };
@@ -247,66 +208,86 @@ function MaintenancePage() {
 
     const handleDownloadPdf = async () => {
         if (!detailedData) return;
-    
+
         const doc = new jsPDF();
         const margin = 14;
-    
-        // Título
+
+        // Encabezado
+        doc.addImage(logo, 'JPG', margin, 10, 40, 20);
         doc.setFontSize(20);
-        doc.text(`Reporte de Mantenimiento #${detailedData.id}`, margin, 22);
-    
-        // Contenido principal en una tabla para mejor alineación
-        const mainData = [
-            ['Usuario', detailedData.usuario || 'N/A'],
-            ['Área', detailedData.area || 'N/A'],
-            ['Tipo de Equipo', detailedData.tipo || 'N/A'],
-            ['Marca', detailedData.marca || 'N/A'],
-            ['Fecha Elaboración', formatDate(detailedData.fecha_de_elaboracion)],
-            ['Fecha Ejecución', formatDate(detailedData.fecha_de_ejecucion)],
-            ['Último Mantenimiento', formatDate(detailedData.fecha_ultimo_mantenimiento)],
-            ['Próximo Mantenimiento', formatDate(detailedData.fecha_actual_de_mantenimiento)],
-        ];
-    
+        doc.text('Reporte de Mantenimiento', doc.internal.pageSize.getWidth() / 2, 25, { align: 'center' });
+        doc.setFontSize(10);
+        doc.text(`Código: FT-MANT-001`, doc.internal.pageSize.getWidth() - margin, 15, { align: 'right' });
+        doc.text(`Versión: 1.0`, doc.internal.pageSize.getWidth() - margin, 20, { align: 'right' });
+        doc.text(`Fecha: ${moment().format('DD/MM/YYYY')}`, doc.internal.pageSize.getWidth() - margin, 25, { align: 'right' });
+
+        // Información del Equipo
         doc.autoTable({
-            startY: 30,
-            head: [['Campo', 'Valor']],
-            body: mainData,
-            theme: 'striped',
-            headStyles: { fillColor: [41, 128, 185] },
+            startY: 40,
+            head: [['Información del Equipo']],
+            body: [
+                [{ content: `Usuario: ${detailedData.usuario || 'N/A'}`, styles: { fontStyle: 'bold' } }],
+                [`Área: ${detailedData.area || 'N/A'}`],
+                [`Tipo de Equipo: ${detailedData.tipo || 'N/A'}`],
+                [`Marca: ${detailedData.marca || 'N/A'}`],
+            ],
+            theme: 'grid',
+            headStyles: { fillColor: [22, 160, 133] },
         });
-    
-        // Actividades y Observaciones
+
+        // Detalles del Mantenimiento
         doc.autoTable({
             startY: doc.previousAutoTable.finalY + 10,
-            head: [['Actividades Realizadas']],
-            body: [[detailedData.actividades_realizadas || 'Sin actividades registradas.']],
+            head: [['Detalles del Mantenimiento']],
+            body: [
+                [{ content: 'Actividades Realizadas:', styles: { fontStyle: 'bold' } }],
+                [detailedData.actividades_realizadas || 'Sin actividades registradas.'],
+                [{ content: 'Observaciones:', styles: { fontStyle: 'bold' } }],
+                [detailedData.observaciones || 'Sin observaciones.'],
+            ],
+            theme: 'grid',
+            headStyles: { fillColor: [22, 160, 133] },
         });
+
+        // Fechas Clave
         doc.autoTable({
-            startY: doc.previousAutoTable.finalY + 5,
-            head: [['Observaciones']],
-            body: [[detailedData.observaciones || 'Sin observaciones.']],
+            startY: doc.previousAutoTable.finalY + 10,
+            head: [['Fechas Clave']],
+            body: [
+                [`Fecha de Elaboración: ${formatDate(detailedData.fecha_de_elaboracion)}`],
+                [`Fecha de Ejecución: ${formatDate(detailedData.fecha_de_ejecucion)}`],
+                [`Fecha Último Mantenimiento: ${formatDate(detailedData.fecha_ultimo_mantenimiento)}`],
+                [`Fecha Próximo Mantenimiento: ${formatDate(detailedData.fecha_actual_de_mantenimiento)}`],
+            ],
+            theme: 'grid',
+            headStyles: { fillColor: [22, 160, 133] },
         });
-    
-        // Firma (si es texto)
-        const finalY = doc.previousAutoTable.finalY;
-        const firmaTecnico = detailedData.firmas?.tecnico;
 
-        if (firmaTecnico) {
-            doc.setFontSize(10);
-            doc.text('Firma del Técnico:', margin, finalY + 15);
+        // Firmas
+        const finalY = doc.previousAutoTable.finalY + 15;
+        const firmaTecnico = detailedData.firmas_tecnico;
+        const firmaAprobo = detailedData.firmas_aprobo;
+        const firmaReviso = detailedData.firmas_reviso;
 
-            if (firmaTecnico.startsWith('data:image')) {
-                // Si es una imagen Base64, la añadimos
-                doc.addImage(firmaTecnico, 'PNG', margin, finalY + 18, 60, 20);
-            } else {
-                // Si es texto, lo escribimos
-                doc.setFont('helvetica', 'italic');
-                doc.setFontSize(12);
-                doc.text(firmaTecnico, margin, finalY + 25);
+        const addSignature = (signature, title, y) => {
+            if (signature) {
+                doc.setFontSize(10);
+                doc.text(title, margin, y);
+                if (signature.startsWith('data:image')) {
+                    doc.addImage(signature, 'PNG', margin, y + 3, 60, 20);
+                } else {
+                    doc.setFont('helvetica', 'italic');
+                    doc.setFontSize(12);
+                    doc.text(signature, margin, y + 10);
+                }
             }
-        }
-    
-        doc.save(`Reporte_Mantenimiento_${detailedData.id}.pdf`);
+        };
+
+        addSignature(firmaTecnico, 'Firma del Técnico:', finalY);
+        addSignature(firmaAprobo, 'Firma de Aprobación:', finalY + 30);
+        addSignature(firmaReviso, 'Firma de Revisión:', finalY + 60);
+
+        doc.save(`mantenimiento_${detailedData.usuario}.pdf`);
     };
 
     const calendarEvents = detailedData ? [
@@ -480,7 +461,7 @@ function MaintenancePage() {
                                             />
                                         </div>
                                         <div className="signature-container">
-                                            <h4>Firma del Técnico</h4>
+                                            <h4>Firmas</h4>
                                             {isEditing ? (
                                                 <div className="signature-edit">
                                                     <div className="signature-options">
@@ -488,21 +469,58 @@ function MaintenancePage() {
                                                         <label><input type="radio" name="signatureType" value="image" checked={signatureType === 'image'} onChange={() => setSignatureType('image')} /> Subir firma</label>
                                                     </div>
                                                     {signatureType === 'text' ? (
-                                                        <input name="firma_tecnico_texto" placeholder="Escriba el nombre del técnico" value={editFormData.firmas?.tecnico?.startsWith('data:image') ? '' : editFormData.firmas?.tecnico || ''} onChange={handleFormChange} />
+                                                        <>
+                                                            <input name="firmas_tecnico" placeholder="Escriba el nombre del técnico" value={editFormData.firmas_tecnico || ''} onChange={handleFormChange} />
+                                                            <input name="firmas_aprobo" placeholder="Escriba el nombre de quien aprueba" value={editFormData.firmas_aprobo || ''} onChange={handleFormChange} />
+                                                            <input name="firmas_reviso" placeholder="Escriba el nombre de quien revisa" value={editFormData.firmas_reviso || ''} onChange={handleFormChange} />
+                                                        </>
                                                     ) : (
                                                         <>
-                                                            <input type="file" accept="image/*" onChange={handleSignatureImageChange} />
-                                                            {signatureImage && <img src={signatureImage} alt="Vista previa de la firma" className="signature-display" />}
+                                                            <div>
+                                                                <label>Firma Técnico:</label>
+                                                                <input type="file" accept="image/*" onChange={(e) => handleSignatureImageChange(e, 'firmas_tecnico')} />
+                                                                {editFormData.firmas_tecnico && <img src={editFormData.firmas_tecnico} alt="Vista previa de la firma" className="signature-display" />}
+                                                            </div>
+                                                            <div>
+                                                                <label>Firma Aprobó:</label>
+                                                                <input type="file" accept="image/*" onChange={(e) => handleSignatureImageChange(e, 'firmas_aprobo')} />
+                                                                {editFormData.firmas_aprobo && <img src={editFormData.firmas_aprobo} alt="Vista previa de la firma" className="signature-display" />}
+                                                            </div>
+                                                            <div>
+                                                                <label>Firma Revisó:</label>
+                                                                <input type="file" accept="image/*" onChange={(e) => handleSignatureImageChange(e, 'firmas_reviso')} />
+                                                                {editFormData.firmas_reviso && <img src={editFormData.firmas_reviso} alt="Vista previa de la firma" className="signature-display" />}
+                                                            </div>
                                                         </>
                                                     )}
-                                                    {/* Aquí podrías añadir campos para otras firmas, como la del usuario */}
                                                 </div>
                                             ) : (
-                                                detailedData.firmas?.tecnico ? (
-                                                    detailedData.firmas.tecnico.startsWith('data:image')
-                                                        ? <img src={detailedData.firmas.tecnico} alt="Firma del técnico" className="signature-display" />
-                                                        : <p className="signature-text">{detailedData.firmas.tecnico}</p>
-                                                ) : <p className="muted">Sin firma</p>
+                                                <>
+                                                    <div className="signature-item">
+                                                        <span>Técnico:</span>
+                                                        {detailedData.firmas_tecnico ? (
+                                                            detailedData.firmas_tecnico.startsWith('data:image')
+                                                                ? <img src={detailedData.firmas_tecnico} alt="Firma del técnico" className="signature-display" />
+                                                                : <p className="signature-text">{detailedData.firmas_tecnico}</p>
+                                                        ) : <p className="muted">Sin firma</p>}
+                                                    </div>
+                                                    <div className="signature-item">
+                                                        <span>Aprobó:</span>
+                                                        {detailedData.firmas_aprobo ? (
+                                                            detailedData.firmas_aprobo.startsWith('data:image')
+                                                                ? <img src={detailedData.firmas_aprobo} alt="Firma de quien aprueba" className="signature-display" />
+                                                                : <p className="signature-text">{detailedData.firmas_aprobo}</p>
+                                                        ) : <p className="muted">Sin firma</p>}
+                                                    </div>
+                                                    <div className="signature-item">
+                                                        <span>Revisó:</span>
+                                                        {detailedData.firmas_reviso ? (
+                                                            detailedData.firmas_reviso.startsWith('data:image')
+                                                                ? <img src={detailedData.firmas_reviso} alt="Firma de quien revisa" className="signature-display" />
+                                                                : <p className="signature-text">{detailedData.firmas_reviso}</p>
+                                                        ) : <p className="muted">Sin firma</p>}
+                                                    </div>
+                                                </>
                                             )}
                                         </div>
                                     </div>

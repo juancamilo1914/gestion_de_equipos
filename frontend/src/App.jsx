@@ -1,5 +1,5 @@
 import './App.css'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Login from './pages/Login/Login.jsx'
 import OlvidasteLaContraseña from './pages/Login/olvidasteLaContraseña.jsx'
 import Home from './pages/home/home.jsx'
@@ -20,6 +20,13 @@ function App() {
   const [view, setView] = useState('login')
   const [token, setToken] = useState(null)
   const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem('authToken');
+    if (storedToken) {
+      handleLogin(storedToken);
+    }
+  }, []);
 
   const handleLogin = (tokenValue) =>{
     if(!tokenValue) return setView('login');
