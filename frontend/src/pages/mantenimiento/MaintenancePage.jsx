@@ -5,7 +5,7 @@ import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 import logo from '../../assets/LOGO_INSTITUCIONAL.jpg';
 
@@ -30,11 +30,14 @@ function MaintenancePage() {
     const [detailedData, setDetailedData] = useState(null);
     const [loadingDetails, setLoadingDetails] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [isAdding, setIsAdding] = useState(false); // Para controlar el modal de "agregar"
+    const [newMaintenanceData, setNewMaintenanceData] = useState(null); // Datos para el nuevo mantenimiento
     const [editFormData, setEditFormData] = useState(null);
     const [signatureType, setSignatureType] = useState('text');
     const [calendarDate, setCalendarDate] = useState(new Date());
     const [equipos, setEquipos] = useState([]); // Nuevo estado para almacenar los equipos
     const [selectedEquipoId, setSelectedEquipoId] = useState(''); // Estado para el equipo seleccionado en el dropdown
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         fetchMaintenanceData();
@@ -111,6 +114,30 @@ function MaintenancePage() {
         }
     }
 
+    const handleOpenAddModal = () => {
+        // Inicializa el formulario para un nuevo mantenimiento
+        setNewMaintenanceData({
+            usuario: '',
+            area: '',
+            tipo: '',
+            marca: '',
+            codigo: '',
+            fecha_ultimo_mantenimiento: null,
+            fecha_actual_de_mantenimiento: null,
+            actividades_realizadas: '',
+            observaciones: '',
+            fecha_de_elaboracion: moment().format('YYYY-MM-DD'), // Fecha de hoy por defecto
+            fecha_de_ejecucion: null,
+            firmas_tecnico: '',
+            firmas_aprobo: '',
+            firmas_reviso: '',
+        });
+        setSelectedEquipoId(''); // Resetea el equipo seleccionado
+        setSelectedItem(null); // Cierra el panel de detalles si está abierto
+        setDetailedData(null); // Limpia los datos detallados del item anterior
+        setIsAdding(true);
+    };
+
     const handleEdit = () => {
         setEditFormData({ ...detailedData });
         setSignatureType(detailedData.firmas_tecnico?.startsWith('data:image') ? 'image' : 'text');
@@ -121,6 +148,7 @@ function MaintenancePage() {
     const handleCancel = () => {
         setIsEditing(false);
         setEditFormData(null);
+        setIsAdding(false);
         setSelectedEquipoId(''); // Limpiar selección de equipo
     };
 
@@ -129,8 +157,7 @@ function MaintenancePage() {
         try {
             // 1. Preparamos los datos para enviar, creando una copia para no modificar el estado directamente.
             const dataToSave = { ...editFormData };
-
-            // Remove id and equipoId from the data to be saved
+            // 2. Removemos propiedades que no deben estar en el cuerpo de la petición PUT.
             delete dataToSave.id;
             delete dataToSave.equipoId;
 
@@ -155,6 +182,35 @@ function MaintenancePage() {
         }
     };
 
+    const handleSaveNew = async (e) => {
+        e.preventDefault();
+        if (!selectedEquipoId) {
+            setError("Por favor, selecciona un equipo para asociar el mantenimiento.");
+            return;
+        }
+        // Buscamos el equipo completo para obtener su código de inventario
+        const selectedEquipo = equipos.find(eq => eq.id === parseInt(selectedEquipoId, 10));
+        if (!selectedEquipo || !selectedEquipo.codigo) {
+            setError("El equipo seleccionado no tiene un código de inventario válido. No se puede crear el mantenimiento.");
+            return;
+        }
+
+        try {
+            const dataToSend = {
+                ...newMaintenanceData,
+                // Enviamos el ID del equipo para crear la relación
+                equipo_id: parseInt(selectedEquipoId, 10)
+            };
+            await api.post('/mantenimiento', dataToSend);
+            setIsAdding(false);
+            setNewMaintenanceData(null);
+            await fetchMaintenanceData();
+        } catch (err) {
+            console.error("Error creating new maintenance:", err);
+            setError("Error al crear el nuevo mantenimiento.");
+        }
+    };
+
     const handleDelete = async () => {
         if (window.confirm(`¿Estás seguro de que quieres eliminar el mantenimiento #${detailedData.id}?`)) {
             try {
@@ -171,22 +227,51 @@ function MaintenancePage() {
     const handleFormChange = (e) => {
         const { name, value } = e.target;
         if (name === "equipoId") {
+            const formDataSetter = isEditing ? setEditFormData : setNewMaintenanceData;
             setSelectedEquipoId(value);
             const selectedEquipo = equipos.find(eq => eq.id === parseInt(value));
             if (selectedEquipo) {
-                setEditFormData(prev => ({
+                formDataSetter(prev => ({
                     ...prev,
                     usuario: selectedEquipo.usuario,
                     area: selectedEquipo.area,
                     tipo: selectedEquipo.tipo,
                     marca: selectedEquipo.marca,
+                    codigo: selectedEquipo.codigo,
                 }));
             } else {
                 // Si no se selecciona ningún equipo, limpiar los campos relacionados
-                setEditFormData(prev => ({ ...prev, usuario: '', area: '', tipo: '', marca: '' }));
+                formDataSetter(prev => ({ ...prev, usuario: '', area: '', tipo: '', marca: '', codigo: '' }));
             }
+            if (isEditing) {
+                setEditFormData(prev => ({ ...prev, [name]: value }));
+            } else {
+                setNewMaintenanceData(prev => ({ ...prev, [name]: value }));
+            }
+        }
+    };
+
+    // Función separada para el formulario de agregar
+    const handleNewFormChange = (e) => {
+        const { name, value } = e.target;
+        if (name === "equipoId") {
+            setSelectedEquipoId(value);
+            const selectedEquipo = equipos.find(eq => eq.id === parseInt(value));
+            const data = selectedEquipo ? { usuario: selectedEquipo.usuario, area: selectedEquipo.area, tipo: selectedEquipo.tipo, marca: selectedEquipo.marca, codigo: selectedEquipo.codigo } : { usuario: '', area: '', tipo: '', marca: '', codigo: '' };
+            setNewMaintenanceData(prev => ({ ...prev, ...data }));
         } else {
-            setEditFormData(prev => ({ ...prev, [name]: value }));
+            setNewMaintenanceData(prev => ({ ...prev, [name]: value }));
+        }
+    };
+
+    const handleNewSignatureImageChange = (e, field) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setNewMaintenanceData(prev => ({ ...prev, [field]: reader.result }));
+            };
+            reader.readAsDataURL(file);
         }
     };
 
@@ -209,11 +294,21 @@ function MaintenancePage() {
     const handleDownloadPdf = async () => {
         if (!detailedData) return;
 
+        // 1. Obtener el historial de mantenimientos para este equipo
+        let historial = [];
+        if (detailedData.equipo_id) {
+            try {
+                const historialRes = await api.get(`/mantenimiento/historial/${detailedData.equipo_id}`);
+                historial = historialRes.data.body || [];
+            } catch (err) {
+                console.error("Error al obtener el historial de mantenimiento:", err);
+            }
+        }
         const doc = new jsPDF();
         const margin = 14;
 
         // Encabezado
-        doc.addImage(logo, 'JPG', margin, 10, 40, 20);
+        doc.addImage(logo, 'JPEG', margin, 10, 40, 20);
         doc.setFontSize(20);
         doc.text('Reporte de Mantenimiento', doc.internal.pageSize.getWidth() / 2, 25, { align: 'center' });
         doc.setFontSize(10);
@@ -222,7 +317,7 @@ function MaintenancePage() {
         doc.text(`Fecha: ${moment().format('DD/MM/YYYY')}`, doc.internal.pageSize.getWidth() - margin, 25, { align: 'right' });
 
         // Información del Equipo
-        doc.autoTable({
+        autoTable(doc, {
             startY: 40,
             head: [['Información del Equipo']],
             body: [
@@ -236,8 +331,8 @@ function MaintenancePage() {
         });
 
         // Detalles del Mantenimiento
-        doc.autoTable({
-            startY: doc.previousAutoTable.finalY + 10,
+        autoTable(doc, {
+            startY: doc.lastAutoTable.finalY + 10,
             head: [['Detalles del Mantenimiento']],
             body: [
                 [{ content: 'Actividades Realizadas:', styles: { fontStyle: 'bold' } }],
@@ -250,8 +345,8 @@ function MaintenancePage() {
         });
 
         // Fechas Clave
-        doc.autoTable({
-            startY: doc.previousAutoTable.finalY + 10,
+        autoTable(doc, {
+            startY: doc.lastAutoTable.finalY + 10,
             head: [['Fechas Clave']],
             body: [
                 [`Fecha de Elaboración: ${formatDate(detailedData.fecha_de_elaboracion)}`],
@@ -263,8 +358,24 @@ function MaintenancePage() {
             headStyles: { fillColor: [22, 160, 133] },
         });
 
+        // Tabla de Historial de Mantenimientos
+        if (historial.length > 0) {
+            const historialBody = historial.map(item => [
+                formatDate(item.fecha_de_ejecucion),
+                item.actividades_realizadas
+            ]);
+
+            autoTable(doc, {
+                startY: doc.lastAutoTable.finalY + 10,
+                head: [['Fecha de Ejecución', 'Actividades Realizadas']],
+                body: historialBody,
+                theme: 'striped',
+                headStyles: { fillColor: [44, 62, 80] },
+            });
+        }
+
         // Firmas
-        const finalY = doc.previousAutoTable.finalY + 15;
+        const finalY = doc.lastAutoTable.finalY + 15;
         const firmaTecnico = detailedData.firmas_tecnico;
         const firmaAprobo = detailedData.firmas_aprobo;
         const firmaReviso = detailedData.firmas_reviso;
@@ -319,6 +430,9 @@ function MaintenancePage() {
         <div className="maintenance-page">
             <div className="page-header">
                 <h2 className="page-title">Gestión de Mantenimiento</h2>
+                <button className="action-btn save" onClick={handleOpenAddModal} disabled={loading}>
+                    Crear Mantenimiento
+                </button>
                 <button className="refresh-btn" onClick={fetchMaintenanceData} disabled={loading}>
                     {loading ? 'Cargando...' : 'Actualizar Datos'}
                 </button>
@@ -331,6 +445,16 @@ function MaintenancePage() {
             {!loading && maintenanceData.length === 0 && !error && (
                 <div className="no-data-message">No hay datos de mantenimiento disponibles.</div>
             )}
+
+            <div className="search-container">
+                <input
+                    type="text"
+                    placeholder="Buscar por ID o usuario..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="search-input"
+                />
+            </div>
 
             {!loading && maintenanceData.length > 0 && (
                 <div className="maintenance-table-container card">
@@ -345,7 +469,11 @@ function MaintenancePage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {maintenanceData.map((item) => (
+                            {maintenanceData
+                            .filter(item =>
+                                (item.id.toString().includes(searchTerm)) ||
+                                (item.usuario?.toLowerCase().includes(searchTerm.toLowerCase()))
+                            ).map((item) => (
                                 <tr key={item.id} onClick={() => handleRowClick(item)} className={selectedItem?.id === item.id ? 'selected' : ''}>
                                     <td>{item.id}</td>
                                     <td>{item.usuario}</td>
@@ -359,8 +487,8 @@ function MaintenancePage() {
                 </div>
             )}
 
-            {selectedItem && (
-                <div className="details-modal" onClick={(e) => { if (e.target === e.currentTarget) setSelectedItem(null); }}>
+            {(selectedItem || isAdding) && (
+                <div className="details-modal" onClick={(e) => { if (e.target === e.currentTarget) { setSelectedItem(null); setIsAdding(false); } }}>
                     <div className="details-panel card" onClick={(e) => e.stopPropagation()}>
                         <button className="close-details-btn" onClick={() => setSelectedItem(null)}>×</button>
                         {loadingDetails ? (
@@ -368,7 +496,7 @@ function MaintenancePage() {
                         ) : detailedData ? (
                             <>
                                 <div className="details-header">
-                                    <h3>Detalles del Mantenimiento #{detailedData.id}</h3>
+                                    <h3>{isEditing ? `Editando Mantenimiento #${detailedData.id}` : `Detalles del Mantenimiento #${detailedData.id}`}</h3>
                                     <div className="details-actions" onClick={(e) => e.stopPropagation()}>
                                         {isEditing ? (
                                             <>
@@ -528,6 +656,92 @@ function MaintenancePage() {
                             </>
                         ) : (
                             <div className="error-message">No se pudieron cargar los detalles.</div>
+                        )}
+                        {isAdding && newMaintenanceData && (
+                            <>
+                                <div className="details-header">
+                                    <h3>Crear Nuevo Mantenimiento</h3>
+                                    <div className="details-actions">
+                                        <button type="button" className="action-btn save" onClick={handleSaveNew}>Guardar</button>
+                                        <button type="button" className="action-btn cancel" onClick={() => setIsAdding(false)}>Cancelar</button>
+                                    </div>
+                                </div>
+                                <div className="details-grid">
+                                    <div className="details-list">
+                                        <form onSubmit={handleSaveNew}>
+                                            <div className="form-section">
+                                                <h4>Información del Equipo</h4>
+                                                <label>
+                                                    Seleccionar Equipo Existente:
+                                                    <select name="equipoId" value={selectedEquipoId} onChange={handleNewFormChange} required>
+                                                        <option value="">-- Seleccionar un equipo --</option>
+                                                        {equipos.map(eq => (
+                                                            <option key={eq.id} value={eq.id}>
+                                                                {eq.usuario} ({eq.tipo} - {eq.marca})
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </label>
+                                                <div className="form-grid-inner">
+                                                    <label>Usuario: <input name="usuario" value={newMaintenanceData.usuario} readOnly placeholder="Se autocompleta" /></label>
+                                                    <label>Área: <input name="area" value={newMaintenanceData.area} readOnly placeholder="Se autocompleta" /></label>
+                                                    <label>Tipo: <input name="tipo" value={newMaintenanceData.tipo} readOnly placeholder="Se autocompleta" /></label>
+                                                    <label>Marca: <input name="marca" value={newMaintenanceData.marca} readOnly placeholder="Se autocompleta" /></label>
+                                                    <label>Código: <input name="codigo" value={newMaintenanceData.codigo} readOnly placeholder="Se autocompleta" /></label>
+                                                </div>
+                                                <hr />
+                                                <h4>Detalles del Mantenimiento</h4>
+                                                <label>Actividades Realizadas: <textarea name="actividades_realizadas" value={newMaintenanceData.actividades_realizadas} onChange={handleNewFormChange} rows="4"></textarea></label>
+                                                <label>Observaciones: <textarea name="observaciones" value={newMaintenanceData.observaciones} onChange={handleNewFormChange} rows="3"></textarea></label>
+                                                <hr />
+                                                <h4>Fechas Clave</h4>
+                                                <div className="form-grid-inner">
+                                                    <label>Fecha de Elaboración: <input type="date" name="fecha_de_elaboracion" value={moment(newMaintenanceData.fecha_de_elaboracion).format('YYYY-MM-DD')} onChange={handleNewFormChange} /></label>
+                                                    <label>Fecha de Ejecución: <input type="date" name="fecha_de_ejecucion" value={newMaintenanceData.fecha_de_ejecucion ? moment(newMaintenanceData.fecha_de_ejecucion).format('YYYY-MM-DD') : ''} onChange={handleNewFormChange} /></label>
+                                                    <label>Fecha Último Mantenimiento: <input type="date" name="fecha_ultimo_mantenimiento" value={newMaintenanceData.fecha_ultimo_mantenimiento ? moment(newMaintenanceData.fecha_ultimo_mantenimiento).format('YYYY-MM-DD') : ''} onChange={handleNewFormChange} /></label>
+                                                    <label>Fecha Próximo Mantenimiento: <input type="date" name="fecha_actual_de_mantenimiento" value={newMaintenanceData.fecha_actual_de_mantenimiento ? moment(newMaintenanceData.fecha_actual_de_mantenimiento).format('YYYY-MM-DD') : ''} onChange={handleNewFormChange} /></label>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div className="details-meta">
+                                        <div className="signature-container">
+                                            <h4>Firmas</h4>
+                                            <div className="signature-edit">
+                                                <div className="signature-options">
+                                                    <label><input type="radio" name="newSignatureType" value="text" checked={signatureType === 'text'} onChange={() => setSignatureType('text')} /> Escribir nombre</label>
+                                                    <label><input type="radio" name="newSignatureType" value="image" checked={signatureType === 'image'} onChange={() => setSignatureType('image')} /> Subir firma</label>
+                                                </div>
+                                                {signatureType === 'text' ? (
+                                                    <>
+                                                        <input name="firmas_tecnico" placeholder="Escriba el nombre del técnico" value={newMaintenanceData.firmas_tecnico || ''} onChange={handleNewFormChange} />
+                                                        <input name="firmas_aprobo" placeholder="Escriba el nombre de quien aprueba" value={newMaintenanceData.firmas_aprobo || ''} onChange={handleNewFormChange} />
+                                                        <input name="firmas_reviso" placeholder="Escriba el nombre de quien revisa" value={newMaintenanceData.firmas_reviso || ''} onChange={handleNewFormChange} />
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <div>
+                                                            <label>Firma Técnico:</label>
+                                                            <input type="file" accept="image/*" onChange={(e) => handleNewSignatureImageChange(e, 'firmas_tecnico')} />
+                                                            {newMaintenanceData.firmas_tecnico && <img src={newMaintenanceData.firmas_tecnico} alt="Vista previa de la firma" className="signature-display" />}
+                                                        </div>
+                                                        <div>
+                                                            <label>Firma Aprobó:</label>
+                                                            <input type="file" accept="image/*" onChange={(e) => handleNewSignatureImageChange(e, 'firmas_aprobo')} />
+                                                            {newMaintenanceData.firmas_aprobo && <img src={newMaintenanceData.firmas_aprobo} alt="Vista previa de la firma" className="signature-display" />}
+                                                        </div>
+                                                        <div>
+                                                            <label>Firma Revisó:</label>
+                                                            <input type="file" accept="image/*" onChange={(e) => handleNewSignatureImageChange(e, 'firmas_reviso')} />
+                                                            {newMaintenanceData.firmas_reviso && <img src={newMaintenanceData.firmas_reviso} alt="Vista previa de la firma" className="signature-display" />}
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
                         )}
                     </div>
                 </div>

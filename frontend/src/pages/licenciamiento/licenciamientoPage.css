@@ -69,17 +69,28 @@
 }
 
 .details-grid input,
-.details-grid textarea {
+.details-grid textarea,
+.details-grid select {
     width: 100%;
     padding: 0.6rem;
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 0.95rem;
     transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: #fff; /* Fondo blanco para el select */
+    -webkit-appearance: none; /* Quita la apariencia por defecto en Safari/Chrome */
+    -moz-appearance: none; /* Quita la apariencia por defecto en Firefox */
+    appearance: none; /* Quita la apariencia por defecto */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem; /* Espacio para el ícono de la flecha */
 }
 
 .details-grid input:focus,
-.details-grid textarea:focus {
+.details-grid textarea:focus,
+.details-grid select:focus {
     outline: none;
     border-color: var(--primary-color, #2980b9);
     box-shadow: 0 0 0 2px rgba(41, 128, 185, 0.2);

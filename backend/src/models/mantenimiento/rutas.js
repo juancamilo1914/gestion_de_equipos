@@ -6,6 +6,7 @@ const controlador = require('./index');
 const router = express.Router();
 
 router.get('/', todos);
+router.get('/historial/:equipo_id', historialPorEquipo);
 router.get ('/:id', uno);
 router.post('/', agregar);
 router.put('/:id', modificar);
@@ -30,6 +31,15 @@ async function uno(req, res, next) {
         next(err);
     }
 };
+
+async function historialPorEquipo(req, res, next) {
+    try {
+        const items = await controlador.historialPorEquipo(req.params.equipo_id);
+        respuesta.succes(req, res, items, 200);
+    } catch(err) {
+        next(err);
+    }
+}
 
 async function agregar(req, res, next) {
     try{

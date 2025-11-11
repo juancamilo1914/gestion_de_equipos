@@ -12,8 +12,8 @@ function Login({ onForgot, onLogin }) {
 
         try {
             const resp = await api.post('/auth/login', {
-                usuario: user,
-                password: pass,
+                usuario: user, // Se usa 'usuario' para la autenticación
+                contraseña: pass, // Cambiado de 'password' a 'contraseña' para coincidir con el backend
             });
 
             // El backend devuelve la estructura: { error, status, body }

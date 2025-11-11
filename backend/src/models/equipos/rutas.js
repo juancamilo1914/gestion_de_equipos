@@ -32,8 +32,8 @@ async function uno(req, res, next) {
 async function agregar(req, res, next) {
     try {
         const items = await controlador.agregar(req.body);
-        const mensaje = 'Item agregado satisfactoriamente';
-        respuesta.succes(req, res, mensaje, 201);
+        // Devolvemos el resultado de la inserción para que el frontend pueda usar el ID
+        respuesta.succes(req, res, items, 201);
     } catch (err) {
         next(err);
     }
@@ -42,8 +42,7 @@ async function agregar(req, res, next) {
 async function modificar(req, res, next) {
     try {
         const items = await controlador.modificar(req.params.id, req.body);
-        const mensaje = 'Item modificado satisfactoriamente';
-        respuesta.succes(req, res, mensaje, 200);
+        respuesta.succes(req, res, 'Item modificado satisfactoriamente', 200);
     } catch (err) {
         next(err);
     }

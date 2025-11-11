@@ -50,16 +50,17 @@ function uno(tabla, id){
 }
 
 function agregar(tabla, data){
+    // Se modifica la consulta para que sea un INSERT simple.
     return new Promise( (resolve, reject) => {
-        conexion.query(`INSERT INTO ${tabla} SET ? ON DUPLICATE KEY UPDATE ?`, [data, data], (error, result) => {
+        conexion.query(`INSERT INTO ${tabla} SET ?`, data, (error, result) => {
             return error ? reject(error) : resolve(result);
         })
     });
 }
 
-function eliminar(tabla, data){
+function eliminar(tabla, id){
     return new Promise( (resolve, reject) => {
-        conexion.query(`DELETE FROM ${tabla} WHERE id = ?`, data.id, (error, result) => {
+        conexion.query(`DELETE FROM ${tabla} WHERE id = ?`, id, (error, result) => {
             return error ? reject(error) : resolve(result);
         })
     });
@@ -68,7 +69,7 @@ function eliminar(tabla, data){
 function query(tabla, consulta){
     return new Promise( (resolve, reject) => {
         conexion.query(`SELECT * FROM ${tabla} WHERE ?`, consulta, (error, result) => {
-            return error ? reject(error) : resolve(result[0]);
+            return error ? reject(error) : resolve(result);
         })
     });
 }

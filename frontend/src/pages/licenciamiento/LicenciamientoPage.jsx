@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 import './licenciamientoPage.css';
 import api from '../../api/axios';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import moment from 'moment'; // Importar moment para manejar fechas si es necesario
 
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
+import logo from '../../assets/LOGO_INSTITUCIONAL.jpg';
 function LicenciamientoPage() {
     const [licenciamientoData, setLicenciamientoData] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -11,10 +14,13 @@ function LicenciamientoPage() {
     const [selectedItem, setSelectedItem] = useState(null);
     const [detailedData, setDetailedData] = useState(null);
     const [loadingDetails, setLoadingDetails] = useState(false);
+    const [isAdding, setIsAdding] = useState(false); // Para controlar el modal de "agregar"
+    const [newLicenciamientoData, setNewLicenciamientoData] = useState(null); // Datos para el nuevo licenciamiento
     const [isEditing, setIsEditing] = useState(false);
     const [editFormData, setEditFormData] = useState(null);
     const [equipos, setEquipos] = useState([]); // Nuevo estado para almacenar los equipos
     const [selectedEquipoId, setSelectedEquipoId] = useState(''); // Estado para el equipo seleccionado en el dropdown
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         fetchLicenciamientoData();
@@ -76,6 +82,24 @@ function LicenciamientoPage() {
         }
     }
 
+    const handleOpenAddModal = () => {
+        // Inicializa el formulario para un nuevo licenciamiento
+        setNewLicenciamientoData({
+            usuario: '',
+            area: '',
+            tipo: '',
+            codigo: '',
+            descripcion: '',
+            sistema_operativo: '',
+            software_de_oficina: '',
+            otro_software: '',
+        });
+        setSelectedEquipoId(''); // Resetea el equipo seleccionado
+        setSelectedItem(null); // Cierra el panel de detalles si está abierto
+        setDetailedData(null); // Limpia los datos detallados del item anterior
+        setIsAdding(true);
+    };
+
     const handleEdit = () => {
         setEditFormData({ ...detailedData });
         setIsEditing(true);
@@ -85,6 +109,7 @@ function LicenciamientoPage() {
     const handleCancel = () => {
         setIsEditing(false);
         setEditFormData(null);
+        setIsAdding(false);
         setSelectedEquipoId(''); // Limpiar selección de equipo
     };
 
@@ -108,6 +133,27 @@ function LicenciamientoPage() {
         setEditFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const handleNewFormChange = (e) => {
+        const { name, value } = e.target;
+        if (name === "equipoId") {
+            setSelectedEquipoId(value);
+            const selectedEquipo = equipos.find(eq => eq.id === parseInt(value));
+            if (selectedEquipo) {
+                setNewLicenciamientoData(prev => ({
+                    ...prev,
+                    usuario: selectedEquipo.usuario,
+                    area: selectedEquipo.area,
+                    tipo: selectedEquipo.tipo,
+                    codigo: selectedEquipo.codigo,
+                }));
+            } else {
+                setNewLicenciamientoData(prev => ({ ...prev, usuario: '', area: '', tipo: '', codigo: '' }));
+            }
+        } else {
+            setNewLicenciamientoData(prev => ({ ...prev, [name]: value }));
+        }
+    };
+
     const handleSave = async (e) => {
         e.preventDefault();
         try {
@@ -122,6 +168,34 @@ function LicenciamientoPage() {
         } catch (err) {
             console.error("Error saving licenciamiento data:", err);
             setError("Error al guardar los cambios.");
+        }
+    };
+
+    const handleSaveNew = async (e) => {
+        e.preventDefault();
+        if (!selectedEquipoId) {
+            setError("Por favor, selecciona un equipo para asociar el licenciamiento.");
+            return;
+        }
+        const selectedEquipo = equipos.find(eq => eq.id === parseInt(selectedEquipoId, 10));
+        if (!selectedEquipo || !selectedEquipo.codigo) {
+            setError("El equipo seleccionado no tiene un código de inventario válido. No se puede crear el licenciamiento.");
+            return;
+        }
+
+        try {
+            const dataToSend = {
+                ...newLicenciamientoData,
+                // Enviamos el ID del equipo para crear la relación
+                equipo_id: parseInt(selectedEquipoId, 10)
+            };
+            await api.post('/licenciamiento', dataToSend);
+            setIsAdding(false);
+            setNewLicenciamientoData(null);
+            await fetchLicenciamientoData();
+        } catch (err) {
+            console.error("Error creating new licenciamiento:", err);
+            setError("Error al crear el nuevo licenciamiento.");
         }
     };
 
@@ -144,25 +218,42 @@ function LicenciamientoPage() {
         const doc = new jsPDF();
         const margin = 14;
 
+        // Encabezado
+        doc.addImage(logo, 'JPEG', margin, 10, 40, 20);
         doc.setFontSize(20);
-        doc.text(`Reporte de Licenciamiento #${detailedData.id}`, margin, 22);
+        doc.text('Reporte de Licenciamiento', doc.internal.pageSize.getWidth() / 2, 25, { align: 'center' });
+        doc.setFontSize(10);
+        doc.text(`Código: FT-LICE-001`, doc.internal.pageSize.getWidth() - margin, 15, { align: 'right' });
+        doc.text(`Versión: 1.0`, doc.internal.pageSize.getWidth() - margin, 20, { align: 'right' });
+        doc.text(`Fecha: ${moment().format('DD/MM/YYYY')}`, doc.internal.pageSize.getWidth() - margin, 25, { align: 'right' });
 
-        const tableData = [
-            ['Usuario', detailedData.usuario || 'N/A'],
-            ['Área', detailedData.area || 'N/A'],
-            ['Tipo', detailedData.tipo || 'N/A'],
-            ['Descripción', detailedData.descripcion || 'N/A'],
-            ['Sistema Operativo', detailedData.sistema_operativo || 'N/A'],
-            ['Software de Oficina', detailedData.software_de_oficina || 'N/A'],
-            ['Otro Software', detailedData.otro_software || 'N/A'],
-        ];
+        // Información del Equipo
+        autoTable(doc, {
+            startY: 40,
+            head: [['Información del Equipo']],
+            body: [
+                [{ content: `Usuario: ${detailedData.usuario || 'N/A'}` }],
+                [`Área: ${detailedData.area || 'N/A'}`],
+                [`Tipo de Equipo: ${detailedData.tipo || 'N/A'}`],
+                [`Código de Inventario: ${detailedData.id || 'N/A'}`],
+            ],
+            theme: 'grid',
+            headStyles: { fillColor: [22, 160, 133] },
+        });
 
-        doc.autoTable({
-            startY: 30,
-            head: [['Campo', 'Valor']],
-            body: tableData,
-            theme: 'striped',
-            headStyles: { fillColor: [41, 128, 185] },
+        // Detalles del Licenciamiento
+        autoTable(doc, {
+            startY: doc.lastAutoTable.finalY + 10,
+            head: [['Detalles del Licenciamiento']],
+            body: [
+                [{ content: 'Descripción:', styles: { fontStyle: 'bold' } }],
+                [detailedData.descripcion || 'Sin descripción.'],
+                [{ content: `Sistema Operativo: ${detailedData.sistema_operativo || 'N/A'}` }],
+                [{ content: `Software de Oficina: ${detailedData.software_de_oficina || 'N/A'}` }],
+                [{ content: `Otro Software: ${detailedData.otro_software || 'N/A'}` }],
+            ],
+            theme: 'grid',
+            headStyles: { fillColor: [22, 160, 133] },
         });
 
         doc.save(`Reporte_Licenciamiento_${detailedData.id}.pdf`);
@@ -172,6 +263,9 @@ function LicenciamientoPage() {
         <div className="licenciamiento-page">
             <div className="page-header">
                 <h2 className="page-title">Gestión de Licenciamiento</h2>
+                <button className="action-btn save" onClick={handleOpenAddModal} disabled={loading}>
+                    Crear Licenciamiento
+                </button>
                 <button className="refresh-btn" onClick={fetchLicenciamientoData} disabled={loading}>
                     {loading ? 'Cargando...' : 'Actualizar Datos'}
                 </button>
@@ -184,6 +278,16 @@ function LicenciamientoPage() {
             {!loading && licenciamientoData.length === 0 && !error && (
                 <div className="no-data-message">No hay datos de licenciamiento disponibles.</div>
             )}
+
+            <div className="search-container">
+                <input
+                    type="text"
+                    placeholder="Buscar por ID (código) o usuario..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="search-input"
+                />
+            </div>
 
             {!loading && licenciamientoData.length > 0 && (
                 <div className="licenciamiento-table-container card">
@@ -198,7 +302,11 @@ function LicenciamientoPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {licenciamientoData.map((item) => (
+                            {licenciamientoData
+                            .filter(item =>
+                                (item.id.toString().toLowerCase().includes(searchTerm.toLowerCase())) ||
+                                (item.usuario?.toLowerCase().includes(searchTerm.toLowerCase()))
+                            ).map((item) => (
                                 <tr key={item.id} onClick={() => handleRowClick(item)} className={selectedItem?.id === item.id ? 'selected' : ''}>
                                     <td>{item.id}</td>
                                     <td>{item.usuario}</td>
@@ -212,8 +320,8 @@ function LicenciamientoPage() {
                 </div>
             )}
 
-            {selectedItem && (
-                <div className="details-modal" onClick={() => setSelectedItem(null)}>
+            {(selectedItem || isAdding) && (
+                <div className="details-modal" onClick={(e) => { if (e.target === e.currentTarget) { setSelectedItem(null); setIsAdding(false); } }}>
                     <div className="details-panel card" onClick={(e) => e.stopPropagation()}> {/* Eliminar el botón de cerrar */}
                         <button className="close-details-btn" onClick={() => setSelectedItem(null)}>×</button>
                         {loadingDetails ? (
@@ -275,6 +383,44 @@ function LicenciamientoPage() {
                             </form>
                         ) : (
                             <div className="error-message">No se pudieron cargar los detalles.</div>
+                        )}
+                        {isAdding && newLicenciamientoData && (
+                            <>
+                                <div className="details-header">
+                                    <h3>Crear Nuevo Licenciamiento</h3>
+                                    <div className="details-actions">
+                                        <button type="button" className="action-btn save" onClick={handleSaveNew}>Guardar</button>
+                                        <button type="button" className="action-btn cancel" onClick={() => setIsAdding(false)}>Cancelar</button>
+                                    </div>
+                                </div>
+                                <form onSubmit={handleSaveNew}>
+                                    <div className="details-grid">
+                                        <label>
+                                            Seleccionar Equipo Existente:
+                                            <select name="equipoId" value={selectedEquipoId} onChange={handleNewFormChange} required>
+                                                <option value="">-- Seleccionar un equipo --</option>
+                                                {equipos.map(eq => (
+                                                    <option key={eq.id} value={eq.id}>
+                                                        {eq.usuario} ({eq.tipo} - {eq.marca})
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </label>
+                                        <hr className="full-width"/>
+                                        <label>Usuario <input name="usuario" value={newLicenciamientoData.usuario} readOnly placeholder="Se autocompleta" /></label>
+                                        <label>Área <input name="area" value={newLicenciamientoData.area} readOnly placeholder="Se autocompleta" /></label>
+                                        <label>Tipo <input name="tipo" value={newLicenciamientoData.tipo} readOnly placeholder="Se autocompleta" /></label>
+                                        <label>Código Inventario <input name="codigo" value={newLicenciamientoData.codigo} readOnly placeholder="Se autocompleta" /></label>
+                                        <label>Sistema Operativo <input name="sistema_operativo" value={newLicenciamientoData.sistema_operativo} onChange={handleNewFormChange} placeholder="Ej: Windows 11 Pro" /></label>
+                                        <label>Software de Oficina <input name="software_de_oficina" value={newLicenciamientoData.software_de_oficina} onChange={handleNewFormChange} placeholder="Ej: Microsoft Office 2021" /></label>
+                                        <label>Otro Software <input name="otro_software" value={newLicenciamientoData.otro_software} onChange={handleNewFormChange} placeholder="Ej: Adobe Photoshop" /></label>
+                                        <label className="full-width">
+                                            Descripción
+                                            <textarea name="descripcion" value={newLicenciamientoData.descripcion} onChange={handleNewFormChange} rows="3" placeholder="Detalles adicionales del licenciamiento"></textarea>
+                                        </label>
+                                    </div>
+                                </form>
+                            </>
                         )}
                     </div>
                 </div>

@@ -14,6 +14,7 @@ function todos(){
             usuario: r.usuario,
             area: r.area,
             tipo: r.tipo,
+            codigo: r.codigo, // Agregado para la lista principal
             fecha_ultimo_mantenimiento: r.fecha_ultimo_mantenimiento,
             fecha_actual_de_mantenimiento: r.fecha_actual_de_mantenimiento,
         }));
@@ -33,6 +34,7 @@ function uno(id){
             usuario: row.usuario,
             area: row.area,
             tipo: row.tipo,
+            codigo: row.codigo, // Agregado para los detalles
             fecha_ultimo_mantenimiento: row.fecha_ultimo_mantenimiento,
             fecha_actual_de_mantenimiento: row.fecha_actual_de_mantenimiento,
             firmas_tecnico: row.firmas_tecnico,
@@ -50,9 +52,11 @@ function uno(id){
 
 function agregar(body){
     const authData = {
+        equipo_id: body.equipo_id,
         usuario: body.usuario,
         area: body.area,
         tipo: body.tipo,
+        // 'codigo' no existe en la tabla mantenimiento, lo eliminamos.
         fecha_ultimo_mantenimiento: body.fecha_ultimo_mantenimiento,
         fecha_actual_de_mantenimiento: body.fecha_actual_de_mantenimiento,
         firmas_tecnico: body.firmas_tecnico,
@@ -70,9 +74,11 @@ function agregar(body){
 
 function modificar(id, body){
     const authData = {
+        // Construimos el objeto explícitamente para evitar campos no deseados.
         usuario: body.usuario,
         area: body.area,
         tipo: body.tipo,
+        // 'codigo' no existe en la tabla mantenimiento, lo eliminamos.
         fecha_ultimo_mantenimiento: body.fecha_ultimo_mantenimiento,
         fecha_actual_de_mantenimiento: body.fecha_actual_de_mantenimiento,
         firmas_tecnico: body.firmas_tecnico,
@@ -93,6 +99,11 @@ function eliminar(id){
     return db.eliminar(TABLA, id);
 }
 
+function historialPorEquipo(equipo_id) {
+    // Usamos la función query para obtener todos los registros que coincidan con el equipo_id
+    return db.query(TABLA, { equipo_id: equipo_id });
+}
+
 
 return {
     todos,
@@ -100,5 +111,6 @@ return {
     agregar,
     modificar,
     eliminar,
+    historialPorEquipo,
 }
 }
