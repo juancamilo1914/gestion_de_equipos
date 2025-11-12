@@ -7,7 +7,7 @@ module.exports = function (dbInyectada){
     let db = dbInyectada;
     
     if(!db){
-        db = require('../../DB/mysql');
+        db = require('../../DB/supabase');
     }
 
     async function login(usuario, password){

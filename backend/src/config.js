@@ -7,6 +7,10 @@ module.exports = {
     jwt:{
         secret: process.env.JWT_SECRET || 'notasecreta!'
     },
+    supabase: {
+        url: process.env.SUPABASE_URL,
+        anonKey: process.env.SUPABASE_ANON_KEY,
+    },
     mysql: {
         host: process.env.MYSQL_HOST || 'localhost',
         user: process.env.MYSQL_USER || 'root',

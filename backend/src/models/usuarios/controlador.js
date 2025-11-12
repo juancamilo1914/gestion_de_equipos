@@ -6,7 +6,7 @@ module.exports = function (dbInyectada){
 let db = dbInyectada;
 
 if(!db){
-    db = require('../../DB/mysql');
+    db = require('../../DB/supabase');
 }
 
 function todos(){
@@ -30,19 +30,19 @@ async function agregar(body){
     const respuestaUsuario = await db.agregar(TABLA, usuario);
 
     // 3. Obtenemos el ID del usuario recién creado
-    let insertID;
+    let insertId;
     // Si es un registro nuevo (body.id no existe o es 0), usamos el ID de la inserción.
     // Si es una actualización, usamos el ID que viene en el body.
     if (body.id) {
-        insertID = body.id;
+        insertId = body.id;
     } else {
-        insertID = respuestaUsuario.insertId;
+        insertId = respuestaUsuario.insertId;
     }
 
     // 4. Si se proporcionó un usuario y contraseña, los guardamos en la tabla 'auth'
     if (body.usuario && body.password) {
         await auth.agregar({
-            id: insertID,
+            id: insertId,
             usuario: body.usuario,
             password: body.password // Usamos 'password' para ser consistentes con el frontend
         });
