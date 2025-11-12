@@ -18,33 +18,37 @@ function uno(id){
 }
 
 async function agregar(body){
+    // 1. Preparamos los datos para la tabla 'usuarios'
     const usuario = {
-    id: body.id,
-    nombre: body.nombre,
-    correo: body.correo, // Añadido campo correo
-    activo: body.activo || 1 // Por defecto, activo
-}
+        // No incluimos el id para que la BD lo genere automáticamente en un nuevo registro.
+        nombre: body.nombre,
+        correo: body.correo,
+        activo: body.activo || 1,
+    }
 
-const respuesta = await db.agregar(TABLA, usuario);
+    // 2. Insertamos el nuevo usuario y obtenemos la respuesta de la BD
+    const respuestaUsuario = await db.agregar(TABLA, usuario);
 
-    var insertID = 0;
-    if(body.id == 0){
-        insertID = respuesta.insertId;
-    }else{
+    // 3. Obtenemos el ID del usuario recién creado
+    let insertID;
+    // Si es un registro nuevo (body.id no existe o es 0), usamos el ID de la inserción.
+    // Si es una actualización, usamos el ID que viene en el body.
+    if (body.id) {
         insertID = body.id;
-}
+    } else {
+        insertID = respuestaUsuario.insertId;
+    }
 
-var respuesta2 = '';
-
-if(body.usuario || body.contraseña){ // Ajustado a 'contraseña' como viene del frontend
-        respuesta2 = await auth.agregar({
-        id: insertID,
-        usuario: body.usuario,
-        password: body.contraseña // Ajustado a 'contraseña'
-    })
-}
-
-return respuesta2;
+    // 4. Si se proporcionó un usuario y contraseña, los guardamos en la tabla 'auth'
+    if (body.usuario && body.password) {
+        await auth.agregar({
+            id: insertID,
+            usuario: body.usuario,
+            password: body.password // Usamos 'password' para ser consistentes con el frontend
+        });
+    }
+    
+    return respuestaUsuario;
 }
 
     function eliminar(body){

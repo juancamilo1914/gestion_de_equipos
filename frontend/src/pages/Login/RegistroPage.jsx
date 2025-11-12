@@ -50,7 +50,7 @@ function RegistroPage({ onBack, onForgot }) {
                 nombre,
                 correo,
                 usuario,
-                contraseña: password,
+                password: password, // Cambiado de 'contraseña' a 'password' para estandarizar.
             });
             
             setSuccess('¡Cuenta creada con éxito! Ahora puedes iniciar sesión.');

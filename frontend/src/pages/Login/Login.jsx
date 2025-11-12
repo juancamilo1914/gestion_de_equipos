@@ -26,8 +26,8 @@ function Login({ onForgot, onLogin, onRegister }) {
             const token = resp?.data?.body;
             if (token) {
                 localStorage.setItem('authToken', token);
-                localStorage.setItem('username', user); // Guardar el nombre de usuario
-                if (onLogin) onLogin(token);
+                localStorage.setItem('username', user); // Guardamos el nombre de usuario
+                if (onLogin) onLogin(token, user); // Pasamos el token Y el usuario
             }
         } catch (err) {
             console.error('Login error', err);
