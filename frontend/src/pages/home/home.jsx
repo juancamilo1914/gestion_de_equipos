@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import './home.css';
 import api from '../../api/axios';
-import MaintenancePage from '../mantenimiento/maintenancePage';
+import MaintenancePage from '../mantenimiento/MaintenancePage';
 import LicenciamientoPage from '../licenciamiento/LicenciamientoPage';
 import CopiasPage from '../copiasDeSeguridad/CopiasPage';
 import ImpresorasPage from '../impresoras/ImpresorasPage';
