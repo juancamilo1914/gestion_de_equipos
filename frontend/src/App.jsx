@@ -1,8 +1,8 @@
 import './App.css'
 import React, { useState, useEffect } from 'react'
 import Login from './pages/Login/Login.jsx'
-import OlvidasteLaContraseña from './pages/Login/olvidasteLaContraseña.jsx'
 import Home from './pages/home/home.jsx'
+import RegistroPage from './pages/Login/RegistroPage.jsx'
 
 function decodeJwt(token){
   try{
@@ -22,6 +22,7 @@ function App() {
   const [user, setUser] = useState(null)
 
   useEffect(() => {
+    // Revisa si hay un token de sesión guardado
     const storedToken = localStorage.getItem('authToken');
     if (storedToken) {
       handleLogin(storedToken);
@@ -41,24 +42,28 @@ function App() {
     setView('home');
   }
 
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('username');
+    setToken(null);
+    setUser(null);
+    setView('login');
+  };
+
   return (
     <>
       <div>
         {view === 'login' && (
-          <Login onForgot={() => setView('forgot')} onLogin={(token) => handleLogin(token)} />
+          <Login onLogin={handleLogin} onRegister={() => setView('registro')} />
         )}
-
-        {view === 'forgot' && (
-          <OlvidasteLaContraseña onBack={() => setView('login')} />
-        )}
-
         {view === 'home' && (
-          <Home onBack={() => { setToken(null); setUser(null); setView('login'); }} username={user} token={token} />
+          <Home onBack={handleLogout} username={user} token={token} />
         )}
 
         {view === 'registro' && (
           <RegistroPage onBack={() => setView('login')} />
         )}
+
       </div>
     </>
   )

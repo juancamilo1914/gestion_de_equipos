@@ -3,17 +3,20 @@ import './Login.css';
 import '../../index.css';
 import api from '../../api/axios';
 
-function Login({ onForgot, onLogin }) {
+function Login({ onForgot, onLogin, onRegister }) {
     const [user, setUser] = useState('');
     const [pass, setPass] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const onSubmit = async (e) => {
         if (e && typeof e.preventDefault === 'function') e.preventDefault();
-
+        setError('');
+        setLoading(true);
         try {
             const resp = await api.post('/auth/login', {
                 usuario: user, // Se usa 'usuario' para la autenticación
-                contraseña: pass, // Cambiado de 'password' a 'contraseña' para coincidir con el backend
+                password: pass, // Estandarizado a 'password' para coincidir con el backend
             });
 
             // El backend devuelve la estructura: { error, status, body }
@@ -24,12 +27,14 @@ function Login({ onForgot, onLogin }) {
             if (token) {
                 localStorage.setItem('authToken', token);
                 localStorage.setItem('username', user); // Guardar el nombre de usuario
-                if (onLogin) onLogin(token, user); // Pasar el nombre de usuario al callback onLogin
+                if (onLogin) onLogin(token);
             }
         } catch (err) {
             console.error('Login error', err);
-            const message = err?.response?.data?.message || err.message || 'Error en el login';
-            alert(`Error al iniciar sesión: ${message}`);
+            const message = err?.response?.data?.body || err?.response?.data?.message || 'Usuario o contraseña incorrectos.';
+            setError(message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -43,6 +48,8 @@ function Login({ onForgot, onLogin }) {
                 </div>
 
                 <form className="login-card" onSubmit={onSubmit} aria-describedby="desc">
+                    {error && <div className="form-message error" style={{color: 'red', marginBottom: '1rem', textAlign: 'center'}}>{error}</div>}
+
                     <p id="desc" className="sr-only">Ingresa tu usuario y contraseña para acceder</p>
 
                     <div className="field">
@@ -76,17 +83,14 @@ function Login({ onForgot, onLogin }) {
                     </div>
 
                     <div className="actions">
-                        <button className="btn primary" type="submit">
-                            Iniciar sesión
+                        <button className="btn primary" type="submit" disabled={loading}>
+                            {loading ? 'Iniciando...' : 'Iniciar sesión'}
                         </button>
                     
                         <div className="alt-links">
-                            <button type="button" className="link tiny" onClick={(e) => { e.preventDefault(); onForgot && onregistro(); }} style={{color: 'var(--primary)', background:'none',border:'none',padding:0,marginTop:8}}>
+                            <button type="button" className="link tiny" onClick={(e) => { e.preventDefault(); onRegister && onRegister(); }} style={{color: 'var(--primary)', background:'none',border:'none',padding:0,marginTop:8, cursor: 'pointer'}}>
                                 ¿No tienes una cuenta? Regístrate
-                            </button>
-                            <button type="button" className="link tiny" onClick={(e) => { e.preventDefault(); onForgot && onForgot(); }} style={{color: 'var(--primary)', background:'none',border:'none',padding:0,marginTop:8}}>
-                                ¿Olvidaste tu contraseña?
-                            </button>
+                            </button>                           
                         </div>
                     </div>
                 </form>

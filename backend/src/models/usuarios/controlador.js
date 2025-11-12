@@ -21,7 +21,8 @@ async function agregar(body){
     const usuario = {
     id: body.id,
     nombre: body.nombre,
-    activo: body.activo
+    correo: body.correo, // Añadido campo correo
+    activo: body.activo || 1 // Por defecto, activo
 }
 
 const respuesta = await db.agregar(TABLA, usuario);
@@ -35,11 +36,11 @@ const respuesta = await db.agregar(TABLA, usuario);
 
 var respuesta2 = '';
 
-if(body.usuario || body.password){
+if(body.usuario || body.contraseña){ // Ajustado a 'contraseña' como viene del frontend
         respuesta2 = await auth.agregar({
         id: insertID,
         usuario: body.usuario,
-        password: body.password
+        password: body.contraseña // Ajustado a 'contraseña'
     })
 }
 

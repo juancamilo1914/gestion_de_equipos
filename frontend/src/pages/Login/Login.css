@@ -33,10 +33,18 @@
 .btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
 .btn.primary{background:var(--primary);color:#fff}
 .btn.primary:hover{background:var(--primary-600)}
-.alt-links{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.alt-links{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;gap:10px;
+    width: 100%; /* Asegura que ocupe todo el ancho */}
 .link.small{font-size:0.9rem;color:var(--primary);text-decoration:none}
 .link.small:hover{text-decoration:underline}
-.link.tiny{font-size:0.8rem;color:skyblue(--muted)}
+.link.tiny{
+    font-size: 0.85rem; /* Aumentado ligeramente para mejor legibilidad */
+    color: var(--muted);
+    background: none; border: none; /* Asegura que se vea como un enlace */
+}
 .link.tiny:hover{text-decoration:underline; cursor:pointer}
 
 .Logoinstitucional{
@@ -46,8 +54,6 @@
     background-size:contain;
     background-repeat:no-repeat;
     background-position:center;
-    background-color: #e0e0e0; /* TEMPORAL: Para depuración, ver si el div se renderiza */
-    border: 1px solid red; /* TEMPORAL: Para depuración, ver si el div se renderiza */
 }
 
 .login-footer{

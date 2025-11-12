@@ -6,7 +6,7 @@ import LicenciamientoPage from '../licenciamiento/LicenciamientoPage';
 import CopiasPage from '../copiasDeSeguridad/CopiasPage';
 import ImpresorasPage from '../impresoras/ImpresorasPage';
 import AgregarEquipoPage from './AgregarEquipoPage'; // Corregir la ruta de importación
-import UserSettingsModal from './UserSettingsModal'; // Importar modal de usuario
+import UserSettingsModal from './UserSettingsModal';
 import AppSettingsModal from './AppSettingsModal'; // Importar modal de app
 
 
