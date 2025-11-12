@@ -42,7 +42,7 @@ module.exports = function (dbInyectada){
     }
 
     if(data.password){
-        authData.password = await bcrypt.hash(data.password.toString(), 10); // Aumentado el cost factor
+        authData.contraseña = await bcrypt.hash(data.password.toString(), 10); // Aumentado el cost factor
     }
     return db.agregar(TABLA, authData);
     }
