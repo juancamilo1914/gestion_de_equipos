@@ -1,4 +1,5 @@
 const { supabaseClient, supabaseServiceClient } = require('../../config');
+const auth = require('./index'); // Para acceder a las funciones de auth
 
 const TABLA_USUARIOS = 'usuarios';
 
@@ -40,7 +41,32 @@ async function register(data) {
         console.error('Profile Error Details:', JSON.stringify(profileError, null, 2));
         // Opcional: Si falla la creación del perfil, se podría eliminar el usuario de auth para mantener la consistencia.
         // await supabaseClient.auth.admin.deleteUser(authData.user.id);
-        throw new Error(`Error al crear perfil: ${profileError.message || profileError.details || JSON.stringify(profileError)}`);
+        throw new Error(`Error al crear perfil: ${profileError.message || profileError.details || JSON.stringify(profileError)}`);    }
+
+    // 3. Obtener el ID del usuario recién creado para guardar en tabla auth
+    // Necesitamos consultar la tabla usuarios para obtener el ID generado
+    const { data: userData, error: userQueryError } = await clientToUse
+        .from(TABLA_USUARIOS)
+        .select('id')
+        .eq('correo', authData.user.email)
+        .single();
+
+    if (userQueryError || !userData) {
+        console.error('Error al obtener ID del usuario:', userQueryError);
+        throw new Error('Usuario creado pero no se pudo obtener su ID para guardar credenciales.');
+    }
+
+    // 4. Guardar usuario y password en la tabla 'auth' usando el controlador de auth
+    try {
+        await auth.agregar({
+            id: userData.id,
+            usuario: usuario,
+            password: password
+        });
+    } catch (authError) {
+        console.error('Error al guardar credenciales en tabla auth:', authError);
+        // Opcional: Si falla, podríamos eliminar el usuario creado
+        throw new Error('Usuario creado pero no se pudieron guardar las credenciales de acceso.');
     }
 
     return { message: 'Usuario registrado exitosamente. Por favor, revisa tu correo para confirmar la cuenta.' };
