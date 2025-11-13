@@ -131,7 +131,7 @@ html,body,#root{height:100%}
 
   /* Contenedor principal para el contenido de la app */
   .app-content {
-    padding: 80px 12px 100px 12px; /* Reducido el padding lateral para más amplitud */
+    padding: 95px 12px 100px 12px; /* Aumentado el padding superior para más espacio */
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -197,7 +197,7 @@ html,body,#root{height:100%}
 
 /* Ajustes finos para pantallas muy pequeñas */
 @media (max-width: 360px) {
-  .app-content { padding: 70px 12px 90px 12px; }
+  .app-content { padding: 85px 12px 90px 12px; }
   .hero-left h2 { font-size: 1.6rem; }
   .stat-value { font-size: 1.6rem; }
   .action-btn { padding: 12px; }
