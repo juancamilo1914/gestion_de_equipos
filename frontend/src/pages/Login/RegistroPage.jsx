@@ -45,7 +45,8 @@ const RegistroPage = ({ onBack }) => {
         } catch (err) {
             console.error('Error en el registro:', err);
             // Muestra el mensaje de error del servidor si está disponible, si no, un mensaje genérico.
-            const errorMessage = err.response?.data?.body || err.message || 'Ocurrió un error inesperado.';
+            // Ajustamos la ruta para obtener el mensaje de error específico.
+            const errorMessage = err.response?.data?.body?.message || err.response?.data?.body || err.message || 'Ocurrió un error inesperado.';
             setError(errorMessage);
         }
     };
