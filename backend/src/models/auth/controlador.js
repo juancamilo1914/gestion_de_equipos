@@ -3,7 +3,7 @@ const { supabaseClient, supabaseServiceClient } = require('../../config');
 const TABLA_USUARIOS = 'usuarios';
 
 async function register(data) {
-    const { correo, password, ...profileData } = data;
+    const { correo, password, usuario, nombre, role } = data;
 
     // 1. Crear el usuario en Supabase Auth
     const { data: authData, error: authError } = await supabaseClient.auth.signUp({
@@ -31,7 +31,9 @@ async function register(data) {
         .insert({
             // id: authData.user.id, // Omitido porque es int8, no UUID
             correo: authData.user.email,
-            nombre: profileData.usuario, // Mapeamos 'usuario' a 'nombre'
+            nombre: nombre,
+            usuario: usuario,
+            role: role,
             activo: 1, // Valor por defecto
         });
 
