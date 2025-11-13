@@ -48,16 +48,19 @@ function RegistroPage({ onBack }) {
                 usuario: formData.usuario,
                 email: formData.email,
                 password: formData.password,
+                nombre: formData.nombre,
+                role: formData.role,
             });
 
             console.log('register response', resp.data);
-            setMessage(resp.data.body.message || '¡Registro exitoso! Revisa tu correo para confirmar.');
+            // Usar una respuesta consistente del backend
+            setMessage(resp.data.message || '¡Registro exitoso! Revisa tu correo para confirmar.');
             setFormData({ usuario: '', email: '', password: '', confirmarPassword: '', nombre: '', role: '' });
             // Opcional: redirigir al login después de unos segundos
             setTimeout(() => onBack && onBack(), 5000);
         } catch (err) {
             console.error('Register error', err);
-            const errorMessage = err?.response?.data?.body?.message || err?.response?.data?.body || err?.response?.data?.message || 'Error en el registro.';
+            const errorMessage = err?.response?.data?.message || err?.response?.data?.error || 'Error en el registro. Inténtalo de nuevo.';
             setError(errorMessage);
         } finally {
             setLoading(false);

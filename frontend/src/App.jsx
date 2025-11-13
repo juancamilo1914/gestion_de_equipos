@@ -5,13 +5,17 @@ import Home from './pages/home/home.jsx'
 import RegistroPage from './pages/Login/RegistroPage.jsx'
 
 function decodeJwt(token){
-  try{
+  try {
     const parts = token.split('.');
-    if(parts.length < 2) return null;
+    if (parts.length !== 3) { // Un JWT válido tiene 3 partes
+      console.error('El token no es un JWT válido.');
+      return null;
+    }
     const payload = parts[1];
     const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
     return JSON.parse(json);
-  }catch(e){
+  } catch (e) {
+    console.error('Error al decodificar el token:', e);
     return null;
   }
 }
@@ -30,14 +34,20 @@ function App() {
   }, []);
 
   const handleLogin = (tokenValue) =>{
-    if(!tokenValue) return setView('login');
-    setToken(tokenValue);
-    // tokenValue may be the raw jwt or an object; handle both
-    let jwt = tokenValue;
-    if(typeof tokenValue === 'object' && tokenValue.token) jwt = tokenValue.token;
+    const jwt = (typeof tokenValue === 'object' && tokenValue.token) ? tokenValue.token : tokenValue;
+
+    if (!jwt) {
+      return handleLogout(); // Si no hay token, limpiar todo y llevar al login
+    }
+
     const payload = decodeJwt(jwt);
-    // try common claim names: usuario, name, username
-    const username = payload?.usuario || payload?.user || payload?.username || payload?.name || payload?.id || null;
+    if (!payload) {
+      return handleLogout(); // Si el token es inválido, limpiar todo
+    }
+
+    localStorage.setItem('authToken', jwt);
+    setToken(jwt);
+    const username = payload?.usuario || payload?.user || payload?.username || payload?.name || payload?.id;
     setUser(username);
     setView('home');
   }
@@ -50,22 +60,20 @@ function App() {
     setView('login');
   };
 
+  // Renderizado condicional basado en el estado 'view'
+  const renderView = () => {
+    switch (view) {
+      case 'registro':
+        return <RegistroPage onBack={() => setView('login')} />;
+      case 'home':
+        return <Home onBack={handleLogout} username={user} token={token} />;
+      default: // 'login' y cualquier otro caso
+        return <Login onLogin={handleLogin} onRegister={() => setView('registro')} />;
+    }
+  };
+
   return (
-    <>
-      <div>
-        {view === 'login' && (
-          <Login onLogin={handleLogin} onRegister={() => setView('registro')} />
-        )}
-        {view === 'home' && (
-          <Home onBack={handleLogout} username={user} token={token} />
-        )}
-
-        {view === 'registro' && (
-          <RegistroPage onBack={() => setView('login')} />
-        )}
-
-      </div>
-    </>
+    <div>{renderView()}</div>
   )
 }
 
