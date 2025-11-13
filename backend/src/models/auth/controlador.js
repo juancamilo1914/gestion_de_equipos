@@ -1,7 +1,8 @@
 const { supabaseClient, supabaseServiceClient } = require('../../config');
-const auth = require('./index'); // Para acceder a las funciones de auth
+const db = require('../../DB/supabase');
 
 const TABLA_USUARIOS = 'usuarios';
+const TABLA_AUTH = 'auth';
 
 async function register(data) {
     const { correo, password, usuario, nombre, role } = data;
@@ -56,9 +57,9 @@ async function register(data) {
         throw new Error('Usuario creado pero no se pudo obtener su ID para guardar credenciales.');
     }
 
-    // 4. Guardar usuario y password en la tabla 'auth' usando el controlador de auth
+    // 4. Guardar usuario y password en la tabla 'auth' directamente
     try {
-        await auth.agregar({
+        await db.agregar(TABLA_AUTH, {
             id: userData.id,
             usuario: usuario,
             password: password
