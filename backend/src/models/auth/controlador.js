@@ -32,7 +32,6 @@ async function register(data) {
             // id: authData.user.id, // Omitido porque es int8, no UUID
             correo: authData.user.email,
             nombre: nombre,
-            role: role,
             activo: 1, // Valor por defecto
         });
 
