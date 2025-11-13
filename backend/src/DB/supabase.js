@@ -14,7 +14,9 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 async function handleSupabaseError(supabaseResponse) {
     if (supabaseResponse.error) {
         console.error('Supabase Error:', supabaseResponse.error);
-        throw error(supabaseResponse.error.message, 500);
+        const err = new Error(supabaseResponse.error.message);
+        err.statusCode = 500;
+        throw err;
     }
     return supabaseResponse.data;
 }
