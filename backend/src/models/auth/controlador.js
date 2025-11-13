@@ -32,16 +32,16 @@ async function register(data) {
             // id: authData.user.id, // Omitido porque es int8, no UUID
             correo: authData.user.email,
             nombre: nombre,
-            usuario: usuario,
             role: role,
             activo: 1, // Valor por defecto
         });
 
     if (profileError) {
         console.error('Supabase Profile Error:', profileError);
+        console.error('Profile Error Details:', JSON.stringify(profileError, null, 2));
         // Opcional: Si falla la creación del perfil, se podría eliminar el usuario de auth para mantener la consistencia.
         // await supabaseClient.auth.admin.deleteUser(authData.user.id);
-        throw new Error('El usuario fue autenticado, pero no se pudo crear su perfil.');
+        throw new Error(`Error al crear perfil: ${profileError.message || profileError.details || JSON.stringify(profileError)}`);
     }
 
     return { message: 'Usuario registrado exitosamente. Por favor, revisa tu correo para confirmar la cuenta.' };
