@@ -1,405 +1,203 @@
-/* Home / Dashboard styles adapted to the prototype design */
+/*
+  Modern Dashboard Styles
+  Rediseño completo para una experiencia de usuario nativa y profesional.
+*/
 
 :root{
-  --sidebar:#0b4a5f;
-  --bg:#0f1724; /* dark background behind content */
-  --main-bg:#e9f2f7; /* light main canvas */
+  /* Paleta de colores moderna y suave */
+  --sidebar-bg: #1e293b; /* slate-800 */
+  --main-bg: #f8fafc;    /* slate-50 */
   --card:#ffffff;
-  --muted:#6b7280;
-  --primary:#0ea5a1;
-  --accent:#2563eb;
-  --radius:12px;
+  --text-primary: #0f172a; /* slate-900 */
+  --text-secondary: #64748b; /* slate-500 */
+  --primary: #4f46e5;    /* indigo-600 */
+  --accent: #8b5cf6;     /* violet-500 */
+  --radius: 20px; /* Bordes más redondeados para un look suave */
 }
 
 html,body,#root{height:100%}
-.home-shell{display:flex;min-height:100vh;background:linear-gradient(180deg,#eaf6ff,#f7fbff)}
 
-.sidebar{width:220px;background:linear-gradient(180deg,var(--sidebar),#0b3550);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:22px}
-.sidebar-brand{font-weight:800;font-size:18px;line-height:1.1; margin-bottom: 20px;}
-.sidebar-top {
-  /* Contenedor para agrupar brand y nav */
-}
-.side-nav{display:flex;flex-direction:column;gap:12px;margin-top:20px}
-.nav-btn{background:rgba(255,255,255,0.06);color:#fff;border:none;padding:10px 12px;border-radius:10px;text-align:left;cursor:pointer;font-weight:700;transition:background 0.2s ease,transform 0.1s ease}
-.nav-btn.active {
-  background: rgba(255, 255, 255, 0.2);
-}
-.nav-btn:hover{background:rgba(255,255,255,0.1);transform:scale(1.02)}
-.nav-btn.small{font-size:0.9rem;padding:8px}
+/* --- Estructura Principal --- */
+.home-shell{display:flex;min-height:100vh;background:var(--main-bg)}
 
-.main-area{flex:1;padding:20px 32px}
-.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
-.logo-row{display:flex;align-items:center;gap:14px}
-.hamburger{display:none;background:transparent;border:none;color:#0f1724;font-size:20px;margin-right:8px}
-.logo-pill{width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--primary));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800}
-.logoNasakiwe{
-  width:100px;
-  height:57px;
-  background-image:url('../../assets/LOGO_INSTITUCIONAL.jpg');
-  background-size:contain;
-  background-repeat:no-repeat;
-  background-position:center;
-}
-.org{font-size:0.9rem;color:#0f1724;font-weight:700}
-.topbar-time {
-  background: #e0f2fe; /* light-blue-100 */
-  color: #0c4a6e; /* light-blue-800 */
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-weight: 800;
-  margin-left: auto; /* Mueve el reloj a la derecha dentro del logo-row */
-  margin-right: 20px; /* Espacio antes de los iconos de acción */
-}
-.top-actions {
-  display: flex;
-}
-.top-actions .icon-btn{background:transparent;border:none;margin-left:8px;font-size:18px;cursor:pointer; position: relative;}
+/* --- Barra Lateral (Sidebar) --- */
+.sidebar{width:240px;background:var(--sidebar-bg);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:24px;border-right:1px solid #334155;}
+.sidebar-brand{font-weight:700;font-size:1.25rem;margin-bottom:2rem;}
+.side-nav{display:flex;flex-direction:column;gap:0.5rem;}
+.nav-btn{background:transparent;color:#cbd5e1;border:none;padding:12px 16px;border-radius:10px;text-align:left;cursor:pointer;font-weight:600;transition:all 0.2s ease;display:flex;align-items:center;gap:12px;}
+.nav-btn.active, .nav-btn:hover{background:var(--primary);color:#fff;transform:translateX(5px);}
+.nav-btn.small{font-size:0.9rem;padding:8px 12px;}
 
-.hero{display:flex;gap:18px;margin-bottom:20px}
-.big-card{flex:1;padding:22px;position:relative;border-radius:var(--radius);box-shadow:0 4px 12px rgba(0,0,0,0.1)}
-.hero-time{position:absolute;left:22px;top:18px;background:#86efac;color:#064e3b;padding:8px 12px;border-radius:6px;font-weight:800}
-.hero-left h2{margin-top:36px;margin-bottom:6px;font-size:28px}
-.username{color:#111827}
-.reminders{min-height:120px;border-radius:10px;background:#fff;padding:12px}
-.reminder-item{display:flex;flex-direction:column;gap:6px}
-.reminder-title{font-weight:700}
-.reminder-date{font-size:12px;color:var(--muted)}
+/* --- Área Principal y Barra Superior --- */
+.main-area{flex:1;padding:24px 32px;overflow-y:auto;}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;}
+.logo-row{display:flex;align-items:center;gap:1rem;}
+.hamburger{display:none;background:transparent;border:none;color:var(--text-primary);font-size:1.5rem;cursor:pointer;}
+.logo-pill{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--primary));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.2rem;}
+.logoNasakiwe{width:100px;height:48px;background-image:url('../../assets/LOGO_INSTITUCIONAL.jpg');background-size:contain;background-repeat:no-repeat;background-position:center;}
+.org{font-size:1rem;color:var(--text-primary);font-weight:600;}
+.topbar-time{background:var(--card);color:var(--text-secondary);padding:8px 16px;border-radius:12px;font-weight:600;margin-left:auto;margin-right:1.5rem;border:1px solid #e2e8f0;}
+.top-actions{display:flex;gap:0.5rem;}
+.icon-btn{background:transparent;border:none;font-size:1.25rem;cursor:pointer;position:relative;color:var(--text-secondary);transition:color 0.2s ease;}
+.icon-btn:hover{color:var(--primary);}
 
-.create-form input{padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.08)}
-.create-form .action-btn{height:40px}
+/* --- Estilo Unificado de Tarjetas --- */
+.card-base{background:var(--card);border-radius:var(--radius);box-shadow:0 4px 25px -5px rgba(0,0,0,0.05);border:1px solid #f1f5f9;padding:24px;transition:all 0.2s ease;}
+.card-base:hover{transform:translateY(-3px);box-shadow:0 8px 30px -7px rgba(0,0,0,0.1);}
+.card-title{font-size:1.1rem;font-weight:600;color:var(--text-primary);margin-bottom:1rem;}
 
-.hero-right{width:140px;display:flex;align-items:flex-end}
-.date-card{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;text-align:center;border-radius:var(--radius);box-shadow:0 2px 8px rgba(0,0,0,0.1)}
-.date-card .month{font-size:12px;color:var(--muted);font-weight:700}
-.date-card .day{font-size:36px;font-weight:800}
-.date-card .year{font-size:12px;color:var(--muted)}
+/* --- Secciones del Dashboard --- */
+.hero{display:flex;gap:1.5rem;margin-bottom:1.5rem;}
+.big-card{flex:1;position:relative;}
+.hero-left h2{margin-top:0;margin-bottom:0.5rem;font-size:1.75rem;color:var(--text-primary);}
+.username{color:var(--primary);font-weight:700;}
+.hero-time{background:#ecfdf5;color:#065f46;padding:8px 12px;border-radius:10px;font-weight:600;display:inline-block;margin-top:1rem;}
+.hero-right{width:180px;display:flex;align-items:center;}
+.date-card{width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px;}
+.date-card .month{font-size:0.8rem;color:var(--text-secondary);font-weight:600;text-transform:uppercase;}
+.date-card .day{font-size:2.5rem;font-weight:700;color:var(--text-primary);line-height:1.1;}
+.date-card .year{font-size:0.9rem;color:var(--text-secondary);}
 
-.stats-section{margin-top:6px}
-.stats-cards{display:flex;gap:12px;margin-bottom:14px}
-.stat{flex:1;padding:16px}
-.stat-value{font-size:20px;font-weight:800;color:var(--accent)}
+.stats-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1.5rem;margin-bottom:1.5rem;}
+.stat{padding:20px;}
+.stat-value{font-size:1.5rem;font-weight:700;color:var(--primary);margin-bottom:0.25rem;}
+.stat-label{font-size:0.9rem;color:var(--text-secondary);font-weight:500;}
 
-.lower-grid{display:grid;grid-template-columns:1fr 320px;gap:14px}
-.actions-card{padding:16px}
-.activity-card{padding:16px}
+.lower-grid{display:grid;grid-template-columns:1fr 340px;gap:1.5rem;}
+.actions-card, .activity-card{padding:24px;}
 
-.quick-actions{display:flex;flex-direction:column;gap:10px}
-.action-btn{display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:linear-gradient(90deg,var(--accent),var(--primary));color:#fff;border:none;cursor:pointer;font-weight:600;transition:transform 0.1s ease,box-shadow 0.2s ease}
-.action-btn:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(0,0,0,0.2)}
+.quick-actions{display:flex;flex-direction:column;gap:0.75rem;}
+.action-btn{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;background:var(--primary);color:#fff;border:none;cursor:pointer;font-weight:600;transition:all 0.2s ease;text-align:left;}
+.action-btn:hover{background:var(--accent);transform:scale(1.03);}
 
-.recent-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-.recent-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;background:linear-gradient(180deg,rgba(6,182,212,0.03),transparent)}
+.recent-list{display:flex;flex-direction:column;gap:1rem;margin-top:1rem;}
+.recent-item{display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:12px;background:#f8fafc;}
 
 /* --- Estilos de Notificaciones --- */
-.notification-badge {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  background-color: #ef4444; /* red-500 */
-  background-color: var(--primary, #ef4444); /* Usar variable o color primario */
-  color: white;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.notifications-modal {
-
-  position: fixed;
-  inset: 0;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6); /* Fondo más oscuro y semitransparente */
-  backdrop-filter: blur(5px); /* Efecto de desenfoque en el fondo */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(240, 248, 255, 0.6); /* aliceblue with transparency */
-  backdrop-filter: blur(4px);
-  z-index: 50;
-  z-index: 1001; /* Encima del backdrop, igual que los settings modals */
-  padding: 1rem;
-  transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
-}
+.notification-badge{position:absolute;top:-8px;right:-8px;background-color:#ef4444;color:white;border-radius:50%;width:22px;height:22px;font-size:0.75rem;display:flex;align-items:center;justify-content:center;font-weight:bold;border:2px solid var(--card);}
+.notifications-modal{position:fixed;inset:0;background-color:rgba(0,0,0,0.5);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1001;padding:1rem;}
 
 @keyframes fadeInScale { /* Reutilizamos la animación definida en SettingsModal.css */
     from { opacity: 0; transform: scale(0.95) translateY(20px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-.notifications-panel {
-  width: 400px;
-  max-width: 90vw;
-  max-height: 80vh;
-  display: flex;
-  flex-direction: column;
-  background-color: var(--card, #fff);
-  background-color: var(--card, #ffffff); /* Usar variable de color de tarjeta */
-  border-radius: var(--radius, 12px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.05); /* Sombra más pronunciada */
-  animation: fadeInScale 0.3s ease-out; /* Aplicar la animación */
-  position: relative;
-  overflow: hidden; /* To keep children within rounded corners */
-  padding: 0; /* Eliminar padding para que el header y list controlen el suyo */
-}
+.notifications-panel{width:450px;max-width:90vw;max-height:85vh;display:flex;flex-direction:column;background-color:var(--card);border-radius:var(--radius);box-shadow:0 10px 30px rgba(0,0,0,0.1);animation:fadeInScale 0.3s ease-out;overflow:hidden;}
+.notifications-header{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.5rem;border-bottom:1px solid #e2e8f0;background-color:#f8fafc;}
+.notifications-header h4{margin:0;font-size:1.1rem;color:var(--text-primary);}
+.notifications-header .link{color:var(--primary);font-weight:600;background:none;border:none;cursor:pointer;}
+.notifications-list{overflow-y:auto;padding:0.5rem;}
+.notification-item{display:flex;gap:1rem;padding:0.75rem 1rem;border-left:4px solid transparent;transition:all 0.2s ease;}
+.notification-item:hover{background-color:#f1f5f9;border-left-color:var(--accent);}
+.notification-content{flex-grow:1;}
+.notification-title{font-weight:600;color:var(--text-primary);}
+.notification-item .muted{font-size:0.8rem;color:var(--text-secondary);}
+.clear-notification-btn{background-color:#e2e8f0;color:var(--text-secondary);border:none;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all 0.2s ease;}
+.clear-notification-btn:hover{background-color:var(--primary);color:white;}
+.close-modal-btn{position:absolute;top:1rem;right:1.5rem;background:none;border:none;font-size:1.5rem;color:var(--text-secondary);cursor:pointer;transition:color 0.2s ease;}
+.close-modal-btn:hover{color:var(--text-primary);}
 
-.notifications-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #e5e7eb; /* cool-gray-200 */
-  background-color: #f8fafc; /* cool-gray-50 */
-  border-bottom: 1px solid #e5e7eb;
-  background-color: var(--bg, #f6f9ff); /* Fondo sutil para el encabezado */
-  border-top-left-radius: var(--radius, 12px);
-  border-top-right-radius: var(--radius, 12px);
-}
-
-.notifications-header-title {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.notifications-header h4 {
-  margin: 0;
-  font-size: 1.1rem;
-  font-size: 1.2rem; /* Ajustar tamaño para consistencia */
-  color: #ffffff; /* cool-gray-800 */
-}
-
-.notifications-header .link {
-  color: var(--primary);
-  font-weight: 600;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.notifications-list {
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  padding: 0.5rem;
-  padding: 0.5rem; /* Mantener padding interno */
-  background-color: var(--card, #ffffff); /* Asegurar que el fondo del listado sea blanco */
-  border-bottom-left-radius: var(--radius, 12px);
-  border-bottom-right-radius: var(--radius, 12px);
-}
-
-.notification-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
-  border-left: 3px solid transparent;
-  border-left: 4px solid transparent; /* Borde más pronunciado */
-  transition: background-color 0.2s ease, opacity 0.3s ease, max-height 0.3s ease;
-  max-height: 100px; /* For transition effect */
-}
-
-.notification-item:hover {
-  background-color: #f9fafb; /* cool-gray-50 */
-  background-color: var(--hover-bg-color, #f0f8ff); /* Usar variable de hover */
-  border-left-color: var(--accent);
-}
-
-.notification-content {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
-
-.notification-title {
-  font-weight: 600;
-  color: #374151; /* cool-gray-700 */
-}
-
-.notification-item .muted {
-  font-size: 0.8rem;
-}
-
-.notification-source {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--accent);
-  margin-top: 4px;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.clear-notification-btn {
-  background-color: #e5e7eb; /* cool-gray-200 */
-  color: #4b5563; /* cool-gray-600 */
-  background-color: var(--bg, #e5e7eb); /* Usar variable de fondo */
-  color: var(--muted, #4b5563); /* Usar variable de muted */
-  border: none;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-weight: bold;
-  flex-shrink: 0;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-.clear-notification-btn:hover {
-  background-color: #10b981; /* green-500 */
-  color: white;
-  background-color: var(--primary, #10b981); /* Usar variable de color primario */
-  color: var(--card, white);
-}
-
-.close-modal-btn {
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  line-height: 1;
-  color: #9ca3af; /* cool-gray-400 */
-  color: var(--muted, #9ca3af); /* Usar variable de muted */
-  cursor: pointer;
-  padding: 0.25rem;
-  transition: color 0.2s ease;
-}
-.close-modal-btn:hover {
-  color: #374151; /* cool-gray-700 */
-  color: var(--text-color-dark, #374151); /* Usar variable de color de texto oscuro */
-}
-
-/* Responsive tweaks */
+/* --- Diseño Responsivo (Tablets) --- */
 @media(max-width:900px){
   .sidebar{display:none}
   .hamburger{display:inline-block}
-  .home-shell.sidebar-open .sidebar{display:block;position:fixed;left:0;top:0;bottom:0;z-index:40;width:220px}
+  .home-shell.sidebar-open .sidebar{display:flex;position:fixed;left:0;top:0;bottom:0;z-index:40;width:240px;animation:slideIn 0.3s ease-out;}
   .backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:30}
   .lower-grid{grid-template-columns:1fr}
-  .stats-cards{flex-direction:column}
-  .hero{flex-direction:column}
-  .hero-right{width:100%}
+  @keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
 }
 
-/* Vista independiente para móviles: Dashboard estilo teléfono */
+/* --- REDISEÑO COMPLETO PARA MÓVILES (Estilo App Nativa) --- */
 @media (max-width: 768px) {
-  .home-shell {
-    background: var(--main-bg);
-    padding: 0;
-  }
-  .sidebar {
-    display: none;
-  }
-  .main-area {
-    padding: 0;
-    width: 100%;
-    overflow-x: hidden;
-  }
+  .home-shell { padding: 0; }
+  .main-area { padding: 0; width: 100%; overflow-x: hidden; }
+
+  /* Barra superior flotante con efecto translúcido */
   .topbar {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 10;
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    top: 0; left: 0; right: 0; z-index: 10;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.07);
     padding: 12px 16px;
-    gap: 8px;
+    margin-bottom: 0;
   }
   .logo-row { flex: 1; }
   .logoNasakiwe, .org { display: none; }
-  .logo-pill { width: 40px; height: 40px; font-size: 1rem; }
-  .topbar-time {
-    background: var(--primary);
-    color: #fff;
-    padding: 6px 10px;
-    border-radius: var(--radius);
-    font-size: 0.8rem;
-    margin: 0;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  }
+  .logo-pill { width: 40px; height: 40px; border-radius: 10px; }
+  .topbar-time { display: none; } /* Oculto para dar más espacio */
   .hamburger { display: block; margin-right: 0; }
-  .hero {
-    margin-top: 80px; /* Space for fixed topbar */
-    padding: 0 16px;
-    gap: 16px;
-  }
-  .big-card, .date-card, .stat, .actions-card, .activity-card {
-    background: var(--card);
-    border-radius: var(--radius);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  }
-  .hero-left h2 { font-size: 1.5rem; margin-top: 0; margin-bottom: 8px; }
-  .hero-time { position: static; display: inline-block; margin-bottom: 12px; }
-  .hero-right { width: 100%; justify-content: center; margin-top: 0; }
-  .date-card { width: 100%; max-width: 240px; margin: 0 auto; }
-  .stats-section { padding: 0 16px; }
-  .stats-cards {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-  .stat { padding: 16px; text-align: center; }
-  .stat-value { font-size: 1.75rem; }
-  .lower-grid {
+
+  /* Contenedor principal para el contenido de la app */
+  .app-content {
+    padding: 80px 16px 100px 16px; /* Top: espacio para topbar, Bottom: espacio para bottom-nav */
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    padding: 16px;
-    margin-bottom: 80px; /* Space for potential bottom nav */
+    gap: 20px;
   }
-  .quick-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+
+  /* Ocultar o adaptar secciones de escritorio */
+  .hero, .stats-cards, .lower-grid {
+    display: contents; /* Elimina el contenedor pero mantiene los hijos */
   }
-  .action-btn {
-    padding: 12px;
-    font-size: 0.9rem;
-    justify-content: center;
+  .hero-right { display: none; }
+
+  /* Estilo de tarjetas para móvil */
+  .big-card, .stat, .actions-card, .activity-card {
+    padding: 20px;
   }
-  .recent-item {
-    background: #f9fafb;
-    border-radius: 10px;
-    padding: 12px;
-  }
+  .hero-left h2 { font-size: 1.8rem; }
+  .stats-section { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .stat { text-align: center; }
+  .stat-value { font-size: 1.8rem; }
+  .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .action-btn { padding: 16px; font-size: 0.9rem; justify-content: center; text-align: center; flex-direction: column; gap: 8px; }
+  
+  /* Paneles de modales */
   .notifications-panel { max-width: 95vw; width: calc(100vw - 2rem); border-radius: 16px; }
-  .notifications-header { border-radius: 16px 16px 0 0; }
-  .notifications-list { border-radius: 0 0 16px 16px; }
+
+  /* --- Barra de Navegación Inferior (Estilo App) --- */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(0, 0, 0, 0.07);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 1rem;
+    z-index: 10;
+  }
+  .bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  .bottom-nav-item.active,
+  .bottom-nav-item:hover {
+    color: var(--primary);
+  }
+  .bottom-nav-item i {
+    font-size: 1.4rem;
+  }
 }
 
-@media(max-width:480px){
-  .main-area{padding:12px 16px}
-  .logo-row{flex-direction:column;gap:8px}
-  .logo-pill{width:48px;height:48px;font-size:14px}
-  .logoNasakiwe{width:80px;height:48px}
-  .org{font-size:0.8rem}
-  .topbar-time{font-size:14px;padding:6px 10px}
-  .top-actions{flex-direction:row;gap:8px}
-  .hero-left h2{font-size:20px;margin-top:20px}
-  .hero-time{padding:6px 10px;font-size:14px}
-  .date-card .day{font-size:28px}
-  .stat-value{font-size:16px}
-  .action-btn{padding:6px 10px;font-size:12px}
-  .sidebar{width:180px;padding:12px}
-  .sidebar-brand{font-size:14px}
-  .nav-btn{padding:6px 8px;font-size:12px}
-  .notifications-panel{max-width:98vw;width:320px}
-  .notifications-header h4{font-size:0.9rem}
-  .notification-item{padding:0.5rem}
-  .notification-title{font-size:13px}
+/* Ajustes finos para pantallas muy pequeñas */
+@media (max-width: 360px) {
+  .app-content { padding: 70px 12px 90px 12px; }
+  .hero-left h2 { font-size: 1.6rem; }
+  .stat-value { font-size: 1.6rem; }
+  .action-btn { padding: 12px; }
 }
