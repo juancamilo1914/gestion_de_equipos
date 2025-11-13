@@ -1,5 +1,6 @@
 const { supabaseClient, supabaseServiceClient } = require('../../config');
 const db = require('../../DB/supabase');
+const auth = require('../../auth');
 
 const TABLA_USUARIOS = 'usuarios';
 const TABLA_AUTH = 'auth';
@@ -73,6 +74,42 @@ async function register(data) {
     return { message: 'Usuario registrado exitosamente. Por favor, revisa tu correo para confirmar la cuenta.' };
 }
 
+async function login(data) {
+    const { usuario, password } = data;
+
+    if (!usuario || !password) {
+        throw new Error('Usuario y contraseña son requeridos.');
+    }
+
+    // Buscar en la tabla 'auth' por usuario y password
+    const authRecords = await db.query(TABLA_AUTH, { usuario, password });
+
+    if (!authRecords || authRecords.length === 0) {
+        throw new Error('Usuario o contraseña incorrectos.');
+    }
+
+    const userAuth = authRecords[0];
+    const userId = userAuth.id;
+
+    // Obtener datos adicionales del usuario de la tabla 'usuarios'
+    const userData = await db.uno(TABLA_USUARIOS, userId);
+
+    if (!userData) {
+        throw new Error('Usuario no encontrado.');
+    }
+
+    // Generar token JWT
+    const token = auth.asignarToken({
+        id: userId,
+        usuario: usuario,
+        nombre: userData.nombre,
+        correo: userData.correo
+    });
+
+    return token;
+}
+
 module.exports = {
     register,
+    login,
 };
