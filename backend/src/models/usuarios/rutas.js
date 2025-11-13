@@ -17,17 +17,17 @@ router.post('/change-password', seguridad(), changePassword);
 async function todos (req, res, next){
     try{
         const items = await controlador.todos();
-        respuesta.succes(req, res, items, 200);
+        respuesta.success(req, res, items, 200);
     }
     catch(err){
-        next(error);
+        next(err);
     }
 };
 
 async function uno(req, res, next) {
     try{
         const items = await controlador.uno(req.params.id);
-        respuesta.succes(req, res, items, 200);
+        respuesta.success(req, res, items, 200);
     }catch(err){
         next(err);
     }
@@ -41,7 +41,7 @@ async function agregar(req, res, next) {
         }else{
             mensaje = 'item modificado satisfactoriamente';
         }
-        respuesta.succes(req, res, mensaje, 201);
+        respuesta.success(req, res, mensaje, 201);
     }catch(err){
         next(err);
     }
@@ -50,7 +50,7 @@ async function agregar(req, res, next) {
 async function eliminar(req, res, next) {
     try{
         const items = await controlador.eliminar(req.body);
-        respuesta.succes(req, res, 'item eliminado satisfactoriamente', 200);
+        respuesta.success(req, res, 'item eliminado satisfactoriamente', 200);
     }catch(err){
         next(err);
     }
@@ -62,7 +62,7 @@ async function changePassword(req, res, next) {
         const { id } = req.user;
         const { oldPassword, newPassword } = req.body;
         await controlador.changePassword(id, oldPassword, newPassword);
-        respuesta.succes(req, res, 'Contraseña actualizada con éxito', 200);
+        respuesta.success(req, res, 'Contraseña actualizada con éxito', 200);
     } catch (err) {
         next(err);
     }

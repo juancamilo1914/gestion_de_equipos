@@ -1,4 +1,4 @@
-const db = require('../../DB/mysql');
+const db = require('../../DB/supabase');
 const ctrl = require('./controlador');
 
 

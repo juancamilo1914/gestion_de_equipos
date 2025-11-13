@@ -1,13 +1,13 @@
-const { supabaseClient } = require('../../config');
+const { supabaseClient, supabaseServiceClient } = require('../../config');
 
 const TABLA_USUARIOS = 'usuarios';
 
 async function register(data) {
-    const { email, password, ...profileData } = data;
+    const { correo, password, ...profileData } = data;
 
     // 1. Crear el usuario en Supabase Auth
     const { data: authData, error: authError } = await supabaseClient.auth.signUp({
-        email: email,
+        email: correo,
         password: password,
     });
 
@@ -22,14 +22,17 @@ async function register(data) {
     }
 
     // 2. Guardar información adicional en la tabla pública 'usuarios'
-    // Usamos el ID del usuario de auth para vincular el perfil.
-    const { error: profileError } = await supabaseClient
+    // Usamos el service role client para insertar en la tabla pública
+    // Nota: La tabla 'usuarios' usa un ID numérico (int8), no el UUID de auth
+    // Por ahora, omitimos el 'id' para que la BD lo genere automáticamente
+    const clientToUse = supabaseServiceClient || supabaseClient;
+    const { error: profileError } = await clientToUse
         .from(TABLA_USUARIOS)
         .insert({
-            id: authData.user.id, // Llave foránea que apunta a auth.users.id
-            email: authData.user.email,
-            usuario: profileData.usuario,
-            // ... puedes agregar otros campos del perfil aquí
+            // id: authData.user.id, // Omitido porque es int8, no UUID
+            correo: authData.user.email,
+            nombre: profileData.usuario, // Mapeamos 'usuario' a 'nombre'
+            activo: 1, // Valor por defecto
         });
 
     if (profileError) {

@@ -9,16 +9,16 @@ router.post('/register', register);
 
 async function register(req, res, next) {
     try {
-        // Extraemos email y password para Supabase Auth
+        // Extraemos correo y password para Supabase Auth
         // y el resto de los datos para la tabla de perfiles.
-        const { email, password, usuario } = req.body;
+        const { correo, password, usuario } = req.body;
 
-        if (!email || !password || !usuario) {
-            return respuestas.error(req, res, 'Faltan datos requeridos (email, password, usuario).', 400);
+        if (!correo || !password || !usuario) {
+            return respuestas.error(req, res, 'Faltan datos requeridos (correo, password, usuario).', 400);
         }
 
         const result = await controlador.register({
-            email,
+            correo,
             password,
             usuario,
         });
