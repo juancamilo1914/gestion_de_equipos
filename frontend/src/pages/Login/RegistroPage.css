@@ -1,4 +1,4 @@
-/* Estilos mobile-first, limpios y responsivos para la página de registro */
+/* Mobile-first, clean and responsive registration styles */
 
 :root{
     --bg:#f6f9ff;
@@ -9,175 +9,63 @@
     --radius:12px;
 }
 
-/* Diseño de la página */
-.registro-page {
-    background: var(--bg);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column; /* Para apilar el wrapper y el footer */
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
+/* Page layout */
+.registro-page{background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.registro-wrapper{width:100%;max-width:980px;display:grid;grid-template-columns:1fr;gap:18px;align-items:start}
+.brand{padding:12px}
+.logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,var(--primary),#06b6d4);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.125rem;box-shadow:0 8px 20px rgba(16,24,40,0.06);margin-bottom:12px}
+.brand h1{margin:0 0 6px 0;font-size:1.25rem; color: rgb(255, 255, 255);}
+.brand .subtitle{margin:0;color:var(--muted);font-size:0.95rem}
 
-.registro-wrapper {
-    width: 100%;
-    max-width: 980px;
-    display: grid;
-    grid-template-columns: 1fr; /* Una columna por defecto para móviles */
-    gap: 18px;
-    align-items: start;
-    background-color: var(--card); /* Fondo blanco para el contenedor principal */
-    border-radius: var(--radius); /* Bordes redondeados para vista móvil */
-    box-shadow: 0 12px 40px rgba(16,24,40,0.06);
-}
-
-.registro-wrapper .brand {
-    padding: 12px;
-    background: linear-gradient(135deg, var(--primary), #06b6d4);
-    color: #fff; /* Texto blanco en la marca */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    border-radius: var(--radius); /* Bordes redondeados para vista móvil */
-    min-height: 250px;
-}
-
-.registro-wrapper .logo {
-    width: 72px;   /* Aumentado para mejor visibilidad */
-    height: 72px;
-    border-radius: 50%; /* Círculo perfecto */
-    font-size: 1.125rem;
-    box-shadow: 0 8px 20px rgba(16,24,40,0.06);
-    margin-bottom: 12px;
-}
-
-.registro-wrapper h1 {
-    margin: 0 0 6px 0;
-    font-size: 1.25rem;
-    color: white; /* Asegurar que el título sea blanco */
-}
-
-.registro-wrapper .subtitle {
-    margin: 0;
-    color: rgba(255, 255, 255, 0.8); /* Subtítulo más claro */
-    font-size: 0.95rem;
-}
-
-/* Tarjeta de registro */
-.registro-card {
-    background: var(--card); /* Fondo blanco para el formulario */
-    border-radius: var(--radius);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.registro-card .field {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.registro-card .field label,
-.registro-card .field .label-text {
-    font-size: 0.9rem;
-    color: #374151; /* Color de texto oscuro para las etiquetas */
-}
+/* Card */
+.registro-card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:0 12px 40px rgba(16,24,40,0.06);display:flex;flex-direction:column;gap:12px}
+.field{display:flex;flex-direction:column;gap:8px;padding-right: 2rem;}
+.label-text{font-size:0.9rem;color:#374151}
 
 /* Inputs */
-.registro-card .input-wrap input {
-    width: 100%;
-    padding: 12px 14px;
-    border-radius: 10px;
-    border: 1px solid #e6eef6;
-    font-size: 1rem;
-    outline: none;
-    transition: box-shadow .12s, border-color .12s, transform .06s;
-    background: transparent;
-    color: var(--text-color-dark, #111827); /* Asegurar color de texto legible */
-}
-
-.registro-card .input-wrap input::placeholder {
-    color: #6d6e6e;
-}
-
-.registro-card .input-wrap input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 8px 24px rgba(37,99,235,0.12);
-}
-
-.registro-card .input-wrap input:focus-visible {
-    outline: 3px solid rgba(37,99,235,0.12);
-    outline-offset: 3px;
-}
+.input-wrap input,.input-wrap select{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #e6eef6;font-size:1rem;outline:none;transition:box-shadow .12s,border-color .12s,transform .06s;background:transparent}
+.input-wrap input::placeholder,.input-wrap select::placeholder{color:#6d6e6e}
+.input-wrap input:focus,.input-wrap select:focus{border-color:var(--primary);box-shadow:0 8px 24px rgba(37,99,235,0.12)}
+.input-wrap input:focus-visible,.input-wrap select:focus-visible{outline:3px solid rgba(37,99,235,0.12);outline-offset:3px}
 
 /* Actions */
-.registro-card .actions {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 4px;
+.actions{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
+.btn.primary{background:var(--primary);color:#fff}
+.btn.primary:hover{background:var(--primary-600)}
+.alt-links{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;gap:10px;
+    width: 100%; /* Asegura que ocupe todo el ancho */}
+.link.small{font-size:0.9rem;color:var(--primary);text-decoration:none}
+.link.small:hover{text-decoration:underline}
+.link.tiny{
+    font-size: 0.85rem; /* Aumentado ligeramente para mejor legibilidad */
+    color: var(--muted);
+    background: none; border: none; /* Asegura que se vea como un enlace */
 }
-/* Estilos de botones */
-.btn {
-    display: inline-flex;
+.link.tiny:hover{text-decoration:underline; cursor:pointer}
+
+.logo-institucional{
+    background-image: url('../../assets/LOGO_INSTITUCIONAL.jpg');
+    height: 50px; /* Altura del logo aumentada */
+    width: 130px;  /* Ancho aumentado para mantener proporción */
+    background-size:contain;
+    background-repeat:no-repeat;
+    background-position:center;
+}
+
+.registro-footer{
+    text-align:center;color:var(--muted);margin-top:6px;font-size:0.9rem;
+    display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 14px;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.2s;
+    gap: 1rem; /* Espacio aumentado entre el texto y el logo */
 }
-.btn.primary { background: var(--primary); color: #fff; }
-.btn.primary:hover:not(:disabled) { background: var(--primary-600); }
-.btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
-.registro-footer {
-    margin-top: 2rem;
-    color: var(--muted); /* Color de texto del footer */
-    width: 100%;
-    max-width: 980px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-}
-
-.logo-institucional {
-    max-height: 40px; /* Ajustado para el footer */
-    width: auto;
-}
-
-.link.small {
-    font-size: 0.9rem;
-    color: var(--primary);
-    text-decoration: none;
-    background: none;
-    border: none;
-    cursor: pointer;
-}
-
-.link.small:hover {
-    text-decoration: underline;
-}
-
-.alt-action-link {
-    text-align: center;
-    margin-top: 1.5rem;
-    width: 100%;
-}
-
-/* Mensajes de error/éxito */
+/* Form messages */
 .form-message {
     padding: 0.8rem;
     margin-bottom: 1rem;
@@ -199,56 +87,17 @@
     border-color: #c3e6cb;
 }
 
-/* Diseños para pantallas más grandes */
+/* Larger layouts */
 @media(min-width:700px){
-    .registro-wrapper{
-        grid-template-columns:1fr 420px; /* Dos columnas: una para la marca, otra para el formulario */
-        gap:32px;
-        align-items: stretch; /* Para que las columnas tengan la misma altura */
-        background-color: transparent; /* El fondo lo darán las columnas internas */
-        box-shadow: 0 12px 40px rgba(16,24,40,0.06);
-    }
-    .registro-wrapper .brand{
-        padding:20px;
-        border-radius: var(--radius) 0 0 var(--radius); /* Redondear solo esquinas izquierdas */
-        min-height: 500px; /* Altura mínima para la sección de marca */
-    }
-    .registro-card{
-        padding:28px;
-        background-color: var(--card);
-        border-radius: 0 var(--radius) var(--radius) 0; /* Redondear solo esquinas derechas */
-        box-shadow: none; /* La sombra ya está en el wrapper */
-        justify-content: center;
-    }
-    .registro-card .actions{
-        flex-direction:row;
-        justify-content: center; /* Centrar el botón principal */
-        align-items:center;
-    }
-}
-@media(min-width: 980px) {
-    .registro-footer {
-        padding-left: 1rem;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        gap: 1rem;
-    }
-    .logo-institucional {
-        max-height: 60px;
-    }
+    .registro-wrapper{grid-template-columns:1fr 420px;gap:32px;align-items:center}
+    .brand{padding:20px}
+    .registro-card{padding:28px}
+    .actions{flex-direction:row;justify-content:space-between;align-items:center}
+    .alt-links{flex-direction:column;align-items:flex-end}
 }
 
 @media(min-width:1100px){
-    .registro-page{
-        padding:40px;
-    }
-    .registro-wrapper .logo{
-        width:72px;
-        height:72px;
-        font-size:1.25rem;
-    }
-    .registro-wrapper h1{
-        font-size:1.5rem;
-    }
+    .registro-page{padding:40px}
+    .logo{width:72px;height:72px;font-size:1.25rem} /* Re-añadir el logo GE más grande para esta resolución */
+    .brand h1{font-size:1.5rem}
 }
