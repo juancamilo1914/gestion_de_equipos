@@ -1,0 +1,191 @@
+.agregar-equipo-page {
+    padding: 1rem;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.agregar-equipo-page .page-header {
+    margin-bottom: 1.5rem;
+}
+
+.agregar-equipo-page .page-header h1 {
+    font-size: 1.8rem;
+    color: #333;
+    margin: 0;
+}
+
+.agregar-equipo-page .page-header p {
+    color: #666;
+    margin-top: 0.5rem;
+    max-width: 600px;
+}
+
+.form-container {
+    padding: 2rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.form-grid label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.form-grid input {
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-grid input:focus {
+    outline: none;
+    border-color: var(--primary, #2563eb);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* Estilo para los select para que coincidan con los inputs */
+.form-grid select {
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    background-color: white; /* Asegura fondo blanco */
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-actions {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.form-message {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    text-align: center;
+    font-weight: 500;
+}
+
+/* --- Estilos para la Tabla de Equipos --- */
+
+.list-container {
+    margin-top: 2.5rem;
+    padding: 1.5rem;
+}
+
+.list-container h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb; /* Un gris más suave */
+    padding-bottom: 0.75rem;
+    font-size: 1.25rem;
+    color: #111827; /* Un negro más suave */
+}
+
+.search-container {
+    margin-bottom: 1rem;
+}
+
+.search-input {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.7rem 1rem;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    font-size: 0.9rem;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary, #2563eb);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.table-responsive {
+    overflow-x: auto;
+    width: 100%;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+th, td {
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: middle;
+}
+
+thead tr {
+    background-color: #f9fafb; /* Fondo muy sutil para la cabecera */
+}
+
+th {
+    font-weight: 600;
+    color: #4b5563; /* Color de texto gris oscuro para la cabecera */
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+}
+
+tbody tr {
+    transition: background-color 0.2s ease-in-out;
+}
+
+tbody tr:hover {
+    background-color: #f3f4f6; /* Un gris claro al pasar el cursor */
+}
+
+.actions-cell {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.action-btn-sm {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white;
+    transition: opacity 0.2s, transform 0.1s;
+}
+
+.action-btn-sm:hover {
+    opacity: 0.85;
+}
+
+.action-btn-sm:active {
+    transform: scale(0.97);
+}
+
+.action-btn-sm.edit {
+    background-color: #f59e0b; /* Amarillo/Naranja */
+}
+
+.action-btn-sm.delete {
+    background-color: #ef4444; /* Rojo */
+}
+
+.form-actions .action-btn.cancel {
+    background-color: #6b7280; /* Gris */
+}

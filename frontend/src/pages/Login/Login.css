@@ -1,0 +1,75 @@
+/* Mobile-first, clean and responsive login styles */
+
+:root{
+    --bg:#f6f9ff;
+    --card:#ffffff;
+    --muted:#6b7280;
+    --primary:#2563eb;
+    --primary-600:#1e40af;
+    --radius:12px;
+}
+
+/* Page layout */
+.login-page{background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-wrapper{width:100%;max-width:980px;display:grid;grid-template-columns:1fr;gap:18px;align-items:start}
+.brand{padding:12px}
+.logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,var(--primary),#06b6d4);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.125rem;box-shadow:0 8px 20px rgba(16,24,40,0.06);margin-bottom:12px}
+.brand h1{margin:0 0 6px 0;font-size:1.25rem; color: white;}
+.brand .subtitle{margin:0;color:var(--muted);font-size:0.95rem}
+
+/* Card */
+.login-card{background:var(--card);border-radius:var(--radius);padding:20px;box-shadow:0 12px 40px rgba(16,24,40,0.06);display:flex;flex-direction:column;gap:12px}
+.field{display:flex;flex-direction:column;gap:8px;padding-right: 2rem;}
+.label-text{font-size:0.9rem;color:#374151}
+
+/* Inputs */
+.input-wrap input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #e6eef6;font-size:1rem;outline:none;transition:box-shadow .12s,border-color .12s,transform .06s;background:transparent}
+.input-wrap input::placeholder{color:#6d6e6e}
+.input-wrap input:focus{border-color:var(--primary);box-shadow:0 8px 24px rgba(37,99,235,0.12)}
+.input-wrap input:focus-visible{outline:3px solid rgba(37,99,235,0.12);outline-offset:3px}
+
+/* Actions */
+.actions{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
+.btn.primary{background:var(--primary);color:#fff}
+.btn.primary:hover{background:var(--primary-600)}
+.alt-links{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.link.small{font-size:0.9rem;color:var(--primary);text-decoration:none}
+.link.small:hover{text-decoration:underline}
+.link.tiny{font-size:0.8rem;color:skyblue(--muted)}
+.link.tiny:hover{text-decoration:underline; cursor:pointer}
+
+.Logoinstitucional{
+    background-image: url('../../assets/LOGO_INSTITUCIONAL.jpg');
+    height: 50px; /* Altura del logo aumentada */
+    width: 130px;  /* Ancho aumentado para mantener proporción */
+    background-size:contain;
+    background-repeat:no-repeat;
+    background-position:center;
+    background-color: #e0e0e0; /* TEMPORAL: Para depuración, ver si el div se renderiza */
+    border: 1px solid red; /* TEMPORAL: Para depuración, ver si el div se renderiza */
+}
+
+.login-footer{
+    text-align:center;color:var(--muted);margin-top:6px;font-size:0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem; /* Espacio aumentado entre el texto y el logo */
+}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* Larger layouts */
+@media(min-width:700px){
+    .login-wrapper{grid-template-columns:1fr 420px;gap:32px;align-items:center}
+    .brand{padding:20px}
+    .login-card{padding:28px}
+    .actions{flex-direction:row;justify-content:space-between;align-items:center}
+    .alt-links{flex-direction:column;align-items:flex-end}
+}
+
+@media(min-width:1100px){
+    .login-page{padding:40px}
+    .logo{width:72px;height:72px;font-size:1.25rem} /* Re-añadir el logo GE más grande para esta resolución */
+    .brand h1{font-size:1.5rem}
+}

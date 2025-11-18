@@ -1,0 +1,150 @@
+.settings-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* Fondo más oscuro y semitransparente */
+    backdrop-filter: blur(5px); /* Efecto de desenfoque en el fondo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001; /* Encima del backdrop */
+    padding: 1rem;
+    transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
+}
+
+.settings-panel {
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background-color: var(--card, #ffffff); /* Usar variable de color de tarjeta */
+    border-radius: var(--radius, 12px); /* Usar variable de radio de borde */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.05); /* Sombra más pronunciada */
+    animation: fadeInScale 0.3s ease-out; /* Nueva animación de entrada */
+    position: relative;
+    padding: 0;
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.95) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: var(--bg, #f6f9ff); /* Fondo sutil para el encabezado */
+    border-top-left-radius: var(--radius, 12px);
+    border-top-right-radius: var(--radius, 12px);
+}
+
+.settings-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-color-dark, #111827); /* Color de texto oscuro */
+}
+
+.close-modal-btn {
+    background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;
+}
+
+.settings-form {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+.settings-form {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    background-color: var(--card, #ffffff); /* Asegurar que el fondo del formulario sea blanco */
+    border-bottom-left-radius: var(--radius, 12px);
+    border-bottom-right-radius: var(--radius, 12px);
+}
+
+.settings-form h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--primary, #2563eb); /* Usar color primario para los títulos de sección */
+    border-bottom: 1px solid var(--border-color, #e5e7eb);
+    padding-bottom: 0.5rem;
+}
+.settings-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.settings-form input,
+.settings-form select {
+    padding: 0.7rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.settings-form hr {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 0.5rem 0;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+.action-btn.save {
+    background-color: var(--primary, #2563eb);
+    color: white;
+}
+
+/* Estilos para el toggle de modo noche */
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+}
+
+.switch input { display: none; }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 28px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px; width: 20px;
+    left: 4px; bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider { background-color: var(--primary, #2563eb); }
+input:checked + .slider:before { transform: translateX(22px); }
