@@ -32,9 +32,12 @@ function AdminHome({ onBack, username }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [currentAdminView, setCurrentAdminView] = useState('dashboard'); // 'dashboard', 'userManagement', 'mantenimiento', etc.
     const [showNotifications, setShowNotifications] = useState(false);
-    const [notifications, setNotifications] = useState([]); // Placeholder para futuras notificaciones
+    
+    // Estados para notificaciones (copiados de Home.jsx)
+    const [reminders, setReminders] = useState([]);
+    const [loadingReminders, setLoadingReminders] = useState(false);
 
-    const notificationsRef = useRef(null); // Aunque no se usen notificaciones aquí, se mantiene para consistencia si se desea añadir
+    const notificationsRef = useRef(null);
 
     const fetchUsers = async () => {
         try {
@@ -50,6 +53,72 @@ function AdminHome({ onBack, username }) {
         }
     };
 
+    // Lógica de notificaciones (copiada de Home.jsx)
+    async function fetchReminders(){
+        setLoadingReminders(true);
+        try {
+            // 1. Obtener recordatorios manuales
+            const remindersPromise = api.get('/recordatorios');
+            // 2. Obtener datos de mantenimiento para generar recordatorios automáticos
+            const maintenancePromise = api.get('/mantenimiento');
+
+            const [remindersResp, maintenanceResp] = await Promise.all([remindersPromise, maintenancePromise]);
+
+            const manualReminders = remindersResp.data.body || [];
+
+            // 3. Transformar mantenimientos en recordatorios
+            const maintenanceReminders = (maintenanceResp.data.body || [])
+                .filter(item => item.fecha_actual_de_mantenimiento) // Solo los que tienen fecha
+                .map(item => ({
+                    id: `mantenimiento-${item.id}`, // ID único para evitar colisiones
+                    title: `Próximo mantenimiento: ${item.usuario} (${item.tipo})`,
+                    date: item.fecha_actual_de_mantenimiento,
+                    realizado: new Date(item.fecha_actual_de_mantenimiento) < new Date(item.fecha_ultimo_mantenimiento), // Considerar realizado si la fecha de próximo mant. es anterior al último.
+                    source: 'mantenimiento' // Identificador de origen
+                }));
+
+            // 4. Combinar ambos tipos de recordatorios
+            setReminders([...manualReminders, ...maintenanceReminders]);
+
+        } catch (err) {
+            console.error('Error al obtener recordatorios y mantenimientos:', err);
+        } finally {
+            setLoadingReminders(false);
+        }
+    }
+
+    async function handleToggleRealizado(rem){
+        // No se puede marcar como realizado un recordatorio automático de mantenimiento
+        if (rem.source === 'mantenimiento') {
+            alert('Este recordatorio se gestiona desde la sección de Mantenimiento.');
+            return;
+        }
+        try{
+            const newVal = rem.realizado ? 0 : 1;
+            await api.patch(`/recordatorios/${rem.id}/realizado`, { realizado: newVal });
+            fetchReminders();
+        }catch(err){
+            console.error('Error toggling realizado', err);
+        }
+    }
+
+    async function handleClearAllNotifications() {
+        if (!confirm('¿Marcar todos los recordatorios manuales como realizados?')) return;
+        try {
+            // Solo marcar los recordatorios manuales no completados
+            const uncompletedManualReminders = reminders.filter(r => !r.realizado && !r.source);
+            const promises = uncompletedManualReminders.map(rem => 
+                api.patch(`/recordatorios/${rem.id}/realizado`, { realizado: 1 })
+            );
+            if (promises.length > 0) await Promise.all(promises);
+            fetchReminders(); // Volver a cargar para reflejar los cambios
+        } catch (err) {
+            console.error('Error al limpiar los recordatorios', err);
+        }
+    }
+
+    const uncompletedReminders = reminders.filter(r => !r.realizado);
+
     useEffect(() => {
         const t = setInterval(() => setNow(new Date()), 1000);
         return () => clearInterval(t);
@@ -57,6 +126,7 @@ function AdminHome({ onBack, username }) {
 
     useEffect(() => {
         fetchUsers();
+        fetchReminders();
     }, []);
 
     const handleInputChange = (e) => {
@@ -177,7 +247,7 @@ function AdminHome({ onBack, username }) {
                         {/* Puedes añadir botones de ajustes o notificaciones aquí si son relevantes para el admin */}
                         <button className="icon-btn" onClick={() => setShowNotifications(s => !s)}>
                             🔔
-                            {notifications.length > 0 && <span className="notification-badge">{notifications.length}</span>}
+                            {uncompletedReminders.length > 0 && <span className="notification-badge">{uncompletedReminders.length}</span>}
                         </button>
                         <button className="icon-btn" title="Cerrar sesión" onClick={handleLogout}>🚪</button>
                     </div>
@@ -330,11 +400,28 @@ function AdminHome({ onBack, username }) {
                                     <span className="icon">🔔</span>
                                     <h4>Notificaciones</h4>
                                 </div>
-                                {/* <button className="link small">Limpiar todo</button> */}
+                                <button className="link small" onClick={handleClearAllNotifications}>Limpiar todo</button>
                             </div>
                             <div className="notifications-list">
-                                {notifications.length > 0 ? (
-                                    <p>Aquí irían las notificaciones.</p>
+                                {uncompletedReminders.length > 0 ? (
+                                    uncompletedReminders.map(rem => (
+                                        <div key={rem.id} className="notification-item">
+                                            <div className="notification-content">
+                                                <div className="notification-title">{rem.title}</div>
+                                                <small className="muted">{rem.date ? new Date(rem.date).toLocaleString() : ''}</small>
+                                                {rem.source === 'mantenimiento' && (
+                                                    <small className="notification-source">
+                                                        <span onClick={(e) => {e.stopPropagation(); setShowNotifications(false); setCurrentAdminView('mantenimiento');}}>Ir a Mantenimiento</span>
+                                                    </small>
+                                                )}
+                                            </div>
+                                            <button 
+                                                className="clear-notification-btn" 
+                                                title="Marcar como realizado"
+                                                onClick={(e) => { e.stopPropagation(); handleToggleRealizado(rem); }}
+                                            >✓</button>
+                                        </div>
+                                    ))
                                 ) : <div className="muted" style={{padding: '1rem'}}>No hay notificaciones nuevas.</div>}
                             </div>
                         </div>
