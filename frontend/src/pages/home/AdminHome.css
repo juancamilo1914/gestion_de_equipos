@@ -1,0 +1,188 @@
+/* Estilos para el Dashboard de Admin */
+.admin-dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: #111827;
+}
+
+.page-header .admin-username {
+    font-weight: bold;
+    color: var(--primary);
+}
+
+.page-header p {
+    margin: 0.25rem 0 0;
+    color: #6b7280;
+}
+
+.toolbar {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.toolbar .btn .icon {
+    margin-right: 0.5rem;
+}
+
+.users-list {
+    padding: 1rem;
+    background-color: #ffffff;
+    border-radius: var(--radius, 12px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos de la tabla */
+.table-responsive {
+    overflow-x: auto;
+    width: 100%;
+}
+
+table {
+    width: 100%;
+    border-spacing: 0;
+    text-align: left;
+}
+
+th, td {
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid #e5e7eb; /* Gris claro */
+}
+
+thead {
+    background-color: #f9fafb;
+}
+
+th {
+    font-weight: 600;
+    color: #4b5563;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+}
+
+tbody tr {
+    transition: background-color 0.2s ease-in-out;
+}
+
+tbody tr:hover {
+    background-color: #f3f4f6;
+}
+
+.actions-cell {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn-sm {
+    padding: 0.3rem 0.6rem;
+    border: none;
+    border-radius: var(--border-radius-small);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.action-btn-sm.edit {
+    background-color: #dbeafe; /* Azul claro */
+    color: #ffffff; /* Azul oscuro */
+}
+.action-btn-sm.edit:hover {
+    background-color: #bfdbfe;
+}
+
+.action-btn-sm.delete {
+    background-color: #fee2e2; /* Rojo claro */
+    color: #ffffff; /* Rojo oscuro */
+}
+.action-btn-sm.delete:hover {
+    background-color: #fecaca;
+}
+
+/* Estilos para el Modal */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(17, 24, 39, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: var(--radius, 12px);
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    animation: fadeInScale 0.3s ease-out;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    color: #111827;
+}
+
+.modal-content .form-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.modal-content .form-grid label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.modal-content .form-grid input {
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.modal-content .form-grid input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(14, 165, 161, 0.2);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 2rem;
+}

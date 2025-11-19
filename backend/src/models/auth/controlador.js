@@ -13,7 +13,7 @@ module.exports = function (dbInyectada){
     async function login(usuario, password){
         const data = await db.query(TABLA, {usuario: usuario});
 
-        if(!data){
+        if(!data || !data.password){
             throw new Error('Usuario o contraseña inválidos');
         }
 
@@ -29,20 +29,20 @@ module.exports = function (dbInyectada){
     }
 
     async function agregar(data){
-        console.log('data',data)
+        // Asegurarse de que usuario y contraseña sean proporcionados para la autenticación
+        if (!data.usuario || !data.password) {
+            throw new Error('Usuario y contraseña son requeridos para la autenticación.');
+        }
 
         const authData = {
-        id: data.id,
-    }
-
-    if(data.usuario){
-        authData.usuario = data.usuario
-    }
-
-    if(data.password){
-        authData.password = await bcrypt.hash(data.password.toString(), 5);
-    }
-    return db.agregar(TABLA, authData);
+            id: data.id,
+            usuario: data.usuario,
+            // Siempre hashear la contraseña, ya que se ha validado que existe
+            password: await bcrypt.hash(data.password.toString(), 5),
+        };
+        
+        // El campo 'contraseña' siempre se enviará al DB con un valor hasheado
+        return db.agregar(TABLA, authData);
     }
 
     async function actualizar(id, oldPassword, newPassword) {
@@ -62,9 +62,14 @@ module.exports = function (dbInyectada){
         return db.actualizar(TABLA, id, { password: newPasswordHashed });
     }
 
+    async function eliminar(id) {
+        return db.eliminar(TABLA, { id: id });
+    }
+
     return {
         agregar,
         login,
         actualizar,
+        eliminar,
     }
 }

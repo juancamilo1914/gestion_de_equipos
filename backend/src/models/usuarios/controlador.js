@@ -1,65 +1,88 @@
 const TABLA = 'usuarios';
-const usuarios = require('.');
 const auth = require('../auth');
-module.exports = function (dbInyectada){
 
-let db = dbInyectada;
+module.exports = function (dbInyectada) {
 
-if(!db){
-    db = require('../../DB/mysql');
-}
+    let db = dbInyectada;
 
-function todos(){
-    return db.todos(TABLA);
-}
+    if (!db) {
+        db = require('../../DB/mysql');
+    }
 
-function uno(id){
-    return db.uno(TABLA, id);
-}
+    async function todos() {
+        return new Promise((resolve, reject) => {
+            db.conexion.query(`SELECT u.id, u.nombre, u.correo, a.usuario FROM usuarios u JOIN auth a ON u.id = a.id`, (error, result) => {
+                return error ? reject(error) : resolve(result);
+            });
+        });
+    }
 
-async function agregar(body){
-    const usuario = {
-    id: body.id,
-    nombre: body.nombre,
-    activo: body.activo
-}
+    function uno(id) {
+        return new Promise((resolve, reject) => {
+            db.conexion.query(`SELECT u.id, u.nombre, u.correo, a.usuario FROM usuarios u JOIN auth a ON u.id = a.id WHERE u.id = ?`, [id], (error, result) => {
+                return error ? reject(error) : resolve(result[0] || null);
+            });
+        });
+    }
 
-const respuesta = await db.agregar(TABLA, usuario);
+    async function agregar(body) {
+        const usuario = {
+            id: body.id,
+            nombre: body.nombre,
+            correo: body.correo,
+            // No guardamos la contraseña en la tabla de usuarios
+        }
 
-    var insertID = 0;
-    if(body.id == 0){
-        insertID = respuesta.insertId;
-    }else{
-        insertID = body.id;
-}
+        const respuesta = await db.agregar(TABLA, usuario);
 
-var respuesta2 = '';
+        await auth.agregar({
+            id: respuesta.insertId, // Usamos el ID del usuario recién creado
+            usuario: body.usuario,
+            password: body.password,
+        });
 
-if(body.usuario || body.password){
-        respuesta2 = await auth.agregar({
-        id: insertID,
-        usuario: body.usuario,
-        password: body.password
-    })
-}
+        return respuesta;
+    }
 
-return respuesta2;
-}
+    async function actualizar(id, body) {
+        const usuarioData = {
+            nombre: body.nombre,
+            correo: body.correo,
+        };
 
-    function eliminar(body){
-    return db.eliminar(TABLA, body);
+        await db.actualizar(TABLA, id, usuarioData);
+
+        if (body.usuario || body.password) {
+            const authData = {};
+            if (body.usuario) authData.usuario = body.usuario;
+            if (body.password) authData.password = await require('bcrypt').hash(body.password.toString(), 5);
+            await db.actualizar('auth', id, authData);
+        }
+
+        return { message: 'Usuario actualizado correctamente' };
     }
 
     async function changePassword(id, oldPassword, newPassword) {
-        return auth.actualizar(id, oldPassword, newPassword);
+        // Implementar lógica para cambiar contraseña
+        // Verificar oldPassword, hashear newPassword, actualizar en auth
+        const authRecord = await db.uno('auth', id);
+        if (!authRecord) throw new Error('Usuario no encontrado');
+
+        const bcrypt = require('bcrypt');
+        const isValid = await bcrypt.compare(oldPassword, authRecord.password);
+        if (!isValid) throw new Error('Contraseña antigua incorrecta');
+
+        const hashedNewPassword = await bcrypt.hash(newPassword, 5);
+        await db.actualizar('auth', id, { password: hashedNewPassword });
+
+        return { message: 'Contraseña cambiada correctamente' };
     }
 
+    async function eliminar(id) {
+        await db.eliminar(TABLA, { id: id });
+        await db.eliminar('auth', { id: id });
+        return { message: 'Usuario eliminado correctamente' };
+    }
 
-return {
-    todos,
-    uno,
-    agregar,
-    eliminar,
-    changePassword,
-}
-}
+    return { todos, uno, agregar, actualizar, eliminar, changePassword };
+} 

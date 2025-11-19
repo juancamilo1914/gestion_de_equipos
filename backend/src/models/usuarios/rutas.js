@@ -10,7 +10,8 @@ const router = express.Router();
 router.get('/', todos);
 router.get ('/:id', uno);
 router.post('/', agregar);
-router.put('/', eliminar);
+router.put('/:id', actualizar);
+router.delete('/:id', eliminar);
 router.post('/change-password', seguridad(), changePassword);
 
 
@@ -20,7 +21,7 @@ async function todos (req, res, next){
         respuesta.succes(req, res, items, 200);
     }
     catch(err){
-        next(error);
+        next(err);
     }
 };
 
@@ -36,12 +37,17 @@ async function uno(req, res, next) {
 async function agregar(req, res, next) {
     try{
         const items = await controlador.agregar(req.body);
-        if(req.body.id == 0){
-            mensaje = 'item agregado satisfactoriamente';
-        }else{
-            mensaje = 'item modificado satisfactoriamente';
-        }
+        const mensaje = 'Usuario registrado satisfactoriamente';
         respuesta.succes(req, res, mensaje, 201);
+    }catch(err){
+        next(err);
+    }
+};
+
+async function actualizar(req, res, next) {
+    try{
+        const items = await controlador.actualizar(req.params.id, req.body);
+        respuesta.succes(req, res, 'Usuario actualizado satisfactoriamente', 200);
     }catch(err){
         next(err);
     }
@@ -49,8 +55,8 @@ async function agregar(req, res, next) {
 
 async function eliminar(req, res, next) {
     try{
-        const items = await controlador.eliminar(req.body);
-        respuesta.succes(req, res, 'item eliminado satisfactoriamente', 200);
+        const items = await controlador.eliminar(req.params.id);
+        respuesta.succes(req, res, 'Usuario eliminado satisfactoriamente', 200);
     }catch(err){
         next(err);
     }

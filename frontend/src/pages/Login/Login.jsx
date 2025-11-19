@@ -6,6 +6,7 @@ import api from '../../api/axios';
 function Login({ onForgot, onLogin }) {
     const [user, setUser] = useState('');
     const [pass, setPass] = useState('');
+    const [error, setError] = useState(''); // Nuevo estado para el mensaje de error
 
     const onSubmit = async (e) => {
         if (e && typeof e.preventDefault === 'function') e.preventDefault();
@@ -13,7 +14,7 @@ function Login({ onForgot, onLogin }) {
         try {
             const resp = await api.post('/auth/login', {
                 usuario: user, // Se usa 'usuario' para la autenticación
-                contraseña: pass, // Cambiado de 'password' a 'contraseña' para coincidir con el backend
+                password: pass, // Usar 'password' para coincidir con el backend y la BD
             });
 
             // El backend devuelve la estructura: { error, status, body }
@@ -24,12 +25,12 @@ function Login({ onForgot, onLogin }) {
             if (token) {
                 localStorage.setItem('authToken', token);
                 localStorage.setItem('username', user); // Guardar el nombre de usuario
-                if (onLogin) onLogin(token, user); // Pasar el nombre de usuario al callback onLogin
+                if (onLogin) onLogin(token); // onLogin solo espera el token según App.jsx
             }
         } catch (err) {
-            console.error('Login error', err);
-            const message = err?.response?.data?.message || err.message || 'Error en el login';
-            alert(`Error al iniciar sesión: ${message}`);
+            console.error('Login error:', err);
+            const message = err?.response?.data?.body || err?.response?.data?.message || 'Error al iniciar sesión. Inténtalo de nuevo.';
+            setError(message); // Establece el mensaje de error en el estado
         }
     };
 
@@ -43,6 +44,8 @@ function Login({ onForgot, onLogin }) {
                 </div>
 
                 <form className="login-card" onSubmit={onSubmit} aria-describedby="desc">
+                    {error && <div className="form-message error">{error}</div>} {/* Muestra el mensaje de error */}
+
                     <p id="desc" className="sr-only">Ingresa tu usuario y contraseña para acceder</p>
 
                     <div className="field">
@@ -79,15 +82,6 @@ function Login({ onForgot, onLogin }) {
                         <button className="btn primary" type="submit">
                             Iniciar sesión
                         </button>
-                    
-                        <div className="alt-links">
-                            <button type="button" className="link tiny" onClick={(e) => { e.preventDefault(); onForgot && onregistro(); }} style={{color: 'var(--primary)', background:'none',border:'none',padding:0,marginTop:8}}>
-                                ¿No tienes una cuenta? Regístrate
-                            </button>
-                            <button type="button" className="link tiny" onClick={(e) => { e.preventDefault(); onForgot && onForgot(); }} style={{color: 'var(--primary)', background:'none',border:'none',padding:0,marginTop:8}}>
-                                ¿Olvidaste tu contraseña?
-                            </button>
-                        </div>
                     </div>
                 </form>
 

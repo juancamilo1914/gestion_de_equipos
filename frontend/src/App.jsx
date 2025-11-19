@@ -1,7 +1,7 @@
 import './App.css'
 import React, { useState, useEffect } from 'react'
 import Login from './pages/Login/Login.jsx'
-import OlvidasteLaContraseña from './pages/Login/olvidasteLaContraseña.jsx'
+import AdminHome from './pages/home/AdminHome.jsx'
 import Home from './pages/home/home.jsx'
 
 function decodeJwt(token){
@@ -38,26 +38,25 @@ function App() {
     // try common claim names: usuario, name, username
     const username = payload?.usuario || payload?.user || payload?.username || payload?.name || payload?.id || null;
     setUser(username);
-    setView('home');
+    if (username === 'admin') {
+      setView('adminHome'); // Redirigir a AdminHome si el usuario es 'admin'
+    } else {
+      setView('home'); // Redirigir a Home normal para otros usuarios
+    }
   }
 
   return (
     <>
-      <div>
+      <div className="app-container">
         {view === 'login' && (
-          <Login onForgot={() => setView('forgot')} onLogin={(token) => handleLogin(token)} />
+          <Login onLogin={(token) => handleLogin(token)} />
         )}
 
-        {view === 'forgot' && (
-          <OlvidasteLaContraseña onBack={() => setView('login')} />
+        {view === 'adminHome' && (
+          <AdminHome onBack={() => { setToken(null); setUser(null); setView('login'); }} username={user} token={token} />
         )}
-
         {view === 'home' && (
           <Home onBack={() => { setToken(null); setUser(null); setView('login'); }} username={user} token={token} />
-        )}
-
-        {view === 'registro' && (
-          <RegistroPage onBack={() => setView('login')} />
         )}
       </div>
     </>
