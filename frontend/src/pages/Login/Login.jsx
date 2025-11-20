@@ -6,6 +6,7 @@ import api from '../../api/axios';
 function Login({ onForgot, onLogin }) {
     const [user, setUser] = useState('');
     const [pass, setPass] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState(''); // Nuevo estado para el mensaje de error
 
     const onSubmit = async (e) => {
@@ -65,16 +66,35 @@ function Login({ onForgot, onLogin }) {
 
                     <div className="field">
                         <label htmlFor="input-pass" className="label-text">Contraseña</label>
-                        <div className="input-wrap">
+                        <div className="input-wrap" style={{ position: 'relative' }}>
                             <input
                                 id="input-pass"
                                 value={pass}
                                 onChange={(e) => setPass(e.target.value)}
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 placeholder="********"
                                 required
                                 autoComplete="current-password"
+                                style={{ paddingRight: '1rem' }}
                             />
+                            <button 
+                                type="button" 
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={{
+                                    position: 'absolute',
+                                    right: '-2rem',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    fontSize: '1.2rem',
+                                    color: '#666'
+                                }}
+                                title={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
+                            >
+                                {showPassword ? '🙈' : '👁️'}
+                            </button>
                         </div>
                     </div>
 

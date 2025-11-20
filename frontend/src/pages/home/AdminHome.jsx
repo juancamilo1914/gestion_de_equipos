@@ -25,7 +25,10 @@ function AdminHome({ onBack, username }) {
         correo: '',
         usuario: '',
         password: '',
+        confirmPassword: '',
     });
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     // Estados para el layout del dashboard (copiados de Home.jsx)
     const [now, setNow] = useState(new Date());
@@ -136,7 +139,9 @@ function AdminHome({ onBack, username }) {
 
     const openModalForCreate = () => {
         setEditingUser(null);
-        setFormData({ nombre: '', correo: '', usuario: '', password: '' });
+        setFormData({ nombre: '', correo: '', usuario: '', password: '', confirmPassword: '' });
+        setShowPassword(false);
+        setShowConfirmPassword(false);
         setIsModalOpen(true);
         setError('');
         setSuccess('');
@@ -149,7 +154,10 @@ function AdminHome({ onBack, username }) {
             correo: user.correo,
             usuario: user.usuario, // Necesitaríamos el nombre de usuario aquí
             password: '', // La contraseña no se edita directamente
+            confirmPassword: '',
         });
+        setShowPassword(false);
+        setShowConfirmPassword(false);
         setIsModalOpen(true);
         setError('');
         setSuccess('');
@@ -165,6 +173,10 @@ function AdminHome({ onBack, username }) {
         }
         if (!editingUser && !formData.password) {
             setError('La contraseña es obligatoria para nuevos usuarios.');
+            return;
+        }
+        if (formData.password !== formData.confirmPassword) {
+            setError('Las contraseñas no coinciden.');
             return;
         }
 
@@ -375,7 +387,65 @@ function AdminHome({ onBack, username }) {
                                     </label>
                                     <label>
                                         Contraseña {editingUser ? '(Dejar en blanco para no cambiar)' : ''}
-                                        <input type="password" name="password" value={formData.password} onChange={handleInputChange} required={!editingUser} />
+                                        <div style={{ position: 'relative' }}>
+                                            <input 
+                                                type={showPassword ? "text" : "password"} 
+                                                name="password" 
+                                                value={formData.password} 
+                                                onChange={handleInputChange} 
+                                                required={!editingUser} 
+                                                style={{ paddingRight: '2.5rem' }}
+                                            />
+                                            <button 
+                                                type="button" 
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                style={{
+                                                    position: 'absolute',
+                                                    right: '0.5rem',
+                                                    top: '50%',
+                                                    transform: 'translateY(-50%)',
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    cursor: 'pointer',
+                                                    fontSize: '1.2rem',
+                                                    color: '#666'
+                                                }}
+                                                title={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
+                                            >
+                                                {showPassword ? '🙈' : '👁️'}
+                                            </button>
+                                        </div>
+                                    </label>
+                                    <label>
+                                        Confirmar Contraseña
+                                        <div style={{ position: 'relative' }}>
+                                            <input 
+                                                type={showConfirmPassword ? "text" : "password"} 
+                                                name="confirmPassword" 
+                                                value={formData.confirmPassword} 
+                                                onChange={handleInputChange} 
+                                                required={!editingUser || formData.password !== ''} 
+                                                style={{ paddingRight: '2.5rem' }}
+                                            />
+                                            <button 
+                                                type="button" 
+                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                style={{
+                                                    position: 'absolute',
+                                                    right: '0.5rem',
+                                                    top: '50%',
+                                                    transform: 'translateY(-50%)',
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    cursor: 'pointer',
+                                                    fontSize: '1.2rem',
+                                                    color: '#666'
+                                                }}
+                                                title={showConfirmPassword ? "Ocultar contraseña" : "Ver contraseña"}
+                                            >
+                                                {showConfirmPassword ? '🙈' : '👁️'}
+                                            </button>
+                                        </div>
                                     </label>
                                 </div>
                                 <div className="form-actions">
